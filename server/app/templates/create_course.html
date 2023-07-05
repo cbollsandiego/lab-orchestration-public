@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Create New Course</h1>
+    <form action="" method="post" novalidate>
+        {{ form.csrf_token }}
+        {{ form.name.label }} <br>
+        {{ form.name() }} <br>
+        {{ form.instructor_name.label }} <br>
+        {{ form.instructor_name() }} <br>
+        {{ form.submit() }} <br>
+    </form>
+{% endblock %}
