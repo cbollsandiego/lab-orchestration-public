@@ -39,9 +39,7 @@ export default {
         this.groups = data
     },
     mounted() {
-        console.log(this.socket)
         this.socket.on('command', (groupId, command) => {
-            console.log(groupId + command)
             var group = this.groups.find(group => group.group_id == groupId)
             switch(command) {
                 case 'handup': group.handRaised = true; break;

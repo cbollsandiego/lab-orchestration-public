@@ -13,6 +13,7 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
         var socket = io();
+        console.log('{{session_id}}')
         socket.emit('enter_room', '{{session_id}}')
         function sendCommand(command) {
             socket.emit('command_send', '{{ group_id }}', command)
