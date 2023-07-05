@@ -305,7 +305,8 @@ def connect_test():
 def send_command(group_id, command):
     session_id = Group.query.get(group_id).session_id
     print(str(group_id))
-    emit(f'command-{group_id}', command, to=str(session_id))
+    #emit('command', (group_id, command), to=str(session_id))
+    emit('command', (group_id, command))
 
 @socketio.on('ping')
 def get_ping():

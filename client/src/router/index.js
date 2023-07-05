@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Ping from '../components/Ping.vue'
+import InstructorLive from '../components/InstructorLive.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/ping',
-      name: 'ping',
-      component: Ping
+      path: '/livesession/:sessionId',
+      name: 'Live Session',
+      component: InstructorLive
     },
   ]
 })

@@ -1,29 +1,34 @@
-import GroupBox from './GroupBox.js'
-export default {
-    components: {
-        GroupBox
-    },
-    data() {
-        return {
-            groups: []
-        }
-    },
-    template: `
+<template>
     <div v-for="group in groups">
-        <group-box 
+        <group-info 
             :name="group.name" 
             :members="group.members" 
             :groupId="group.group_id" 
             :score="group.score"
             :handRaised="group.handRaised"
             :atCheckpoint="group.atCheckpoint"
-            :progress="group.progress"
-            @scoreUpdated="updateGroups">
-        </group-box>
+            :progress="group.progress">
+        </group-info>
     </div>
-    `,
+</template>
+
+<script>
+import GroupInfo from './GroupInfo.vue'
+export default {
+    name: 'GroupsSet',
+    props: {
+        socket: {default: 1}
+    },
+    components: {
+        GroupInfo
+    },
+    data() {
+        return {
+            groups: []
+        }
+    },
     async created() {
-        const response = await fetch("http://127.0.0.1:5000/labs/fetch/" + this.$sessionId);
+        const response = await fetch("http://127.0.0.1:5000/labs/fetch/" + this.$route.params.sessionId);
         const data = await response.json();
         for(var i = 0; i < data.length; i++) {
             data[i].score = 0;
@@ -33,8 +38,9 @@ export default {
         }
         this.groups = data
     },
-    mounted () {
-        this.$socket.on('command', (groupId, command) => {
+    mounted() {
+        console.log(this.socket)
+        this.socket.on('command', (groupId, command) => {
             console.log(groupId + command)
             var group = this.groups.find(group => group.group_id == groupId)
             switch(command) {
@@ -54,5 +60,6 @@ export default {
         updateGroups() {
             this.groups.sort((a, b) => b.score - a.score)
         },
-    },
+    }
 }
+</script>

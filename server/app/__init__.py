@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_socketio import SocketIO
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -14,5 +15,6 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = '/login'
 socketio = SocketIO(app)
+CORS(app, resources={r'/*': {'origins': '*'}})
 
 from app import models, routes
