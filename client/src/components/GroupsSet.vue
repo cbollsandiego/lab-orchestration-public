@@ -1,16 +1,28 @@
 <template>
-    <div v-for="group in groups">
-        <group-info 
-            :name="group.name" 
-            :members="group.members" 
-            :groupId="group.group_id" 
-            :score="group.score"
-            :handRaised="group.handRaised"
-            :atCheckpoint="group.atCheckpoint"
-            :progress="group.progress">
-        </group-info>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col" v-for="group in groups" :key="group.group_id">
+              <div class="card h-100">
+                <div class="card-body">
+                  <GroupInfo
+                    :name="group.name"
+                    :members="group.members"
+                    :groupId="group.group_id"
+                    :score="group.score"
+                    :handRaised="group.handRaised"
+                    :atCheckpoint="group.atCheckpoint"
+                    :progress="group.progress"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</template>
+  </template>
 
 <script>
 import GroupInfo from './GroupInfo.vue'
@@ -61,3 +73,23 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.container {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+.card {
+  background-color: #f0f0f0;
+  margin-bottom: 10px;
+}
+
+.card-body {
+  padding: 10px;
+}
+
+.row-cols-1 > .col {
+  margin-bottom: 10px;
+}
+</style>

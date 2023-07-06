@@ -1,8 +1,11 @@
 <template>
-    <groups-set
-        :socket="socketio">
-    </groups-set>
-</template>
+    <div class="container py-5">
+      <h2 class="text-center mb-4">Session {{ $route.params.sessionId }}</h2>
+      <div class="bg-light p-4">
+        <groups-set :socket="socketio"></groups-set>
+      </div>
+    </div>
+  </template>
 
 <script>
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
@@ -22,3 +25,14 @@ export default {
     }
 }
 </script>
+
+<style>
+.container {
+  background-color: #f8f9fa12;
+  border-radius: 10px;
+}
+
+.bg-light {
+  background-color: #ffffff;
+}
+</style>
