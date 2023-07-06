@@ -1,8 +1,8 @@
 <template>
     <div class="container">
         <p>Lab {{ $route.params.lab_num }}</p>
-        <input type="submit" value="Raise hand" onclick="return sendCommand('handup')">
-    <input type="submit" value="Lower hand" onclick="return sendCommand('handdown')">
+        <input type="submit" value="Raise hand" @click="sendCommand('handup')">
+    <input type="submit" value="Lower hand" @click="sendCommand('handdown')">
         <form>
             <div v-for="(question, index) in questions" :key="index" class="mb-3">
                 <label for="addBookTitle" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
@@ -38,7 +38,7 @@ export default {
     },
     methods: {
         getQuestions() {
-            const path = 'http://localhost:5001/comp110/sp23/1/2/2';
+            const path = 'http://localhost:5000/comp110/sp23/1/2/2';
             axios.get(path)
                 .then((res) => {
                     this.questions = res.data.questions;
@@ -49,12 +49,12 @@ export default {
                 });
         },
         sendCommand(command) {
-            socket.emit('command_send', this.$route.params.group, command);
+            this.socket.emit('command_send', this.$route.params.group, command);
         }
     }, 
     created() {
         this.getQuestions();
-        this.socket = io("127.0.0.1:5001");
+        this.socket = io("127.0.0.1:5000");
         this.socket.emit("enter_room", this.$route.params.session);
     },
 };
