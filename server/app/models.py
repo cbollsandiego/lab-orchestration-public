@@ -45,9 +45,10 @@ def load_user(id):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    course_name = db.Column(db.String(100))
+    course_name = db.Column(db.String(100),nullable=False)
+    semester=db.Column(db.String)
+    section_num=db.Column(db.Integer)
     course_instructor = db.Column(db.Integer, db.ForeignKey('user.id'))
-
 
     groups = db.relationship('Group', backref='course')
 
