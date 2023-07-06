@@ -8,6 +8,7 @@ from app.helpers.process_csv import read_csv
 import json
 from collections import namedtuple
 from flask_socketio import emit, join_room
+from datetime import datetime
 
 @app.route('/')
 @login_required
@@ -268,66 +269,12 @@ def lab_fetcher(session_id):
     #response = jsonify(dict)
     return dict
 
-        
-@app.route("/student_view/lab<int:lab_num>",methods=['GET', 'POST'])
-def student_view(lab_num):
-
-    lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
-    print(lab)
-    # the file is beung read through a string (change to read from file)
-    f= lab.questions
-    raw_results = json.loads(f)
-    print(raw_results)
-    my_dict={}
-    question_data={"list_of_answers":[]}
-    for question in raw_results:
-        my_dict[question["order_num"]]= question
-        question_data["list_of_answers"].append(question["order_num"])
-       # add conditional for checkbox 
-       # add that the typed message in the text area box can be saved 
-    form = StudentLab(data= question_data) 
-    for item in form.list_of_answers:
-        if item.validate_on_submit():
-
-            new_answer=Student_lab(saved_answer=item.students.data)
-            print(item.students.id)
-       # db.session.add(new_answer) 
-        #db.session.commit()
-      
-       # return redirect(url_for("student_view/lab2"))
-    return render_template("home.html",data=my_dict,lab=lab_num, form=form)
-
-@socketio.on('connect')
-def connect_test():
-    print("connected, I think")
-
-@socketio.on('command_send')
-def send_command(group_id, command):
-    session_id = Group.query.get(group_id).session_id
-    print(str(group_id))
-    emit('command', (group_id, command), to=str(session_id))
-
-@socketio.on('ping')
-def get_ping():
-    emit('flask_ping', broadcast=True)
-
-@socketio.on('enter_room')
-def enter_room(room_name):
-    join_room(str(room_name))
-
-@app.route('/pingtest/<int:group_id>')
-def pingtest(group_id):
-    session_id = Group.query.get(group_id).session_id
-    return render_template('emit_test.html', group_id=group_id, session_id=session_id)
-
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
-def student_view2(course_name,lab_num,group_num,semester,section_num):
+def student_view(course_name,lab_num,group_num,semester,section_num):
 
- #   lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
-   # course=Course.query.filter_by (section_num=section_num,semester=semester,course_name=course_name). first_or_404().id
-  #  answer=Student_lab.query.filter_by(course_id=course,group_name=group_num).all()
-   # for item in answer:
-    #    print(item.saved_answer)
+    #lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
+    course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
+    
     # the file is beung read through a string (change to read from file)
     f="""[
     {
@@ -360,34 +307,45 @@ def student_view2(course_name,lab_num,group_num,semester,section_num):
         "type": "Question",
         "checkpoint": false
     }
-]"""
+    ]"""
     raw_results = json.loads(f)
-    question_data={"list_of_answers":[]}
-    response_object = {"status":"succes","questions": raw_results}
+    response_object = {"status":"success","questions": raw_results}
     if request.method == 'POST':
         post_data = request.get_json()
-        question_data['list_of_answers'].append({"title":post_data.get("answer")})
+        now = datetime.now()
+        print(post_data.get("id"))
+        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer"),course_id=course)
+        db.session.add(student_lab) 
+        db.session.commit()
         response_object['message'] = 'Question saved!'
-        
+        print( "commit succesfull")
 
-   # my_dict={}
-   # question_data={"list_of_answers":[]}
-   # for question in raw_results:
-      #  my_dict[str(question["order_num"])]= question
-       # question_data["list_of_answers"].append(question["order_num"])
-       # add conditional for checkbox 
-       # add that the typed message in the text area box can be saved 
-   # form = StudentLab(data= question_data) 
-
-   # for item in form.list_of_answers:
-     #   if item.validate_on_submit():
-       #     now = datetime.now()
-          #  student_lab=Student_lab( question_num= int(item.id[-1]), group_name=group_num, submit_time=now,saved_answer=item.students.data,course_id=course)
-         #   db.session.add(student_lab) 
-          #  db.session.commit()
-         #   flash('answer submitted!')
-            #return redirect(url_for(course_name+'/'+semester+'/s'+str(section_num)+'/lab'+str(lab_num)+'/group'+str(group_num)))
-   # return redirect(url_for("student_view/lab2"))
     return jsonify (response_object)
 
+
+
+
+
+@socketio.on('connect')
+def connect_test():
+    print("connected, I think")
+
+@socketio.on('command_send')
+def send_command(group_id, command):
+    session_id = Group.query.get(group_id).session_id
+    print(str(group_id))
+    emit('command', (group_id, command), to=str(session_id))
+
+@socketio.on('ping')
+def get_ping():
+    emit('flask_ping', broadcast=True)
+
+@socketio.on('enter_room')
+def enter_room(room_name):
+    join_room(str(room_name))
+
+@app.route('/pingtest/<int:group_id>')
+def pingtest(group_id):
+    session_id = Group.query.get(group_id).session_id
+    return render_template('emit_test.html', group_id=group_id, session_id=session_id)
 
