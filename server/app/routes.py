@@ -319,3 +319,75 @@ def enter_room(room_name):
 def pingtest(group_id):
     session_id = Group.query.get(group_id).session_id
     return render_template('emit_test.html', group_id=group_id, session_id=session_id)
+
+@app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
+def student_view2(course_name,lab_num,group_num,semester,section_num):
+
+ #   lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
+   # course=Course.query.filter_by (section_num=section_num,semester=semester,course_name=course_name). first_or_404().id
+  #  answer=Student_lab.query.filter_by(course_id=course,group_name=group_num).all()
+   # for item in answer:
+    #    print(item.saved_answer)
+    # the file is beung read through a string (change to read from file)
+    f="""[
+    {
+        "order_num": 0,
+        "title": "What are the names of all the files in the repository you just cloned?",
+        "type": "Question",
+        "checkpoint": false
+    },
+    {
+        "order_num": 1,
+        "title": "What symbols are used to indicate that the REPL is ready for you to enter a statement?",
+        "type": "Question",
+        "checkpoint": false
+    },
+    {
+        "order_num": 2,
+        "title": "Draw a square",
+        "type": "Exercise",
+        "checkpoint": false
+    },
+    {
+        "order_num": 3,
+        "title": "What code did you write? Copy and paste that code for the answer to this question. Include only the Python code, not the “>>>” that indicates that you are in the REPL.",
+        "type": "Question",
+        "checkpoint": true
+    },
+    {
+        "order_num": 4,
+        "title": "What is the third oldest line of code in your Python REPL history? If the arrow keys arent working for you, put “Arrow Keys Dont Work :(” for your answer.",
+        "type": "Question",
+        "checkpoint": false
+    }
+]"""
+    raw_results = json.loads(f)
+    question_data={"list_of_answers":[]}
+    response_object = {"status":"succes","questions": raw_results}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        question_data['list_of_answers'].append({"title":post_data.get("answer")})
+        response_object['message'] = 'Question saved!'
+        
+
+   # my_dict={}
+   # question_data={"list_of_answers":[]}
+   # for question in raw_results:
+      #  my_dict[str(question["order_num"])]= question
+       # question_data["list_of_answers"].append(question["order_num"])
+       # add conditional for checkbox 
+       # add that the typed message in the text area box can be saved 
+   # form = StudentLab(data= question_data) 
+
+   # for item in form.list_of_answers:
+     #   if item.validate_on_submit():
+       #     now = datetime.now()
+          #  student_lab=Student_lab( question_num= int(item.id[-1]), group_name=group_num, submit_time=now,saved_answer=item.students.data,course_id=course)
+         #   db.session.add(student_lab) 
+          #  db.session.commit()
+         #   flash('answer submitted!')
+            #return redirect(url_for(course_name+'/'+semester+'/s'+str(section_num)+'/lab'+str(lab_num)+'/group'+str(group_num)))
+   # return redirect(url_for("student_view/lab2"))
+    return jsonify (response_object)
+
+
