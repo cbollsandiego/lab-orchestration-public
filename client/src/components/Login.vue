@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div> 
+        <alert :message="message"></alert>
       <form>
         <div class="mb-3">
             <label for="loginEmail" class="form-label">Email:</label>
@@ -14,17 +15,20 @@
 
 <script>
     import axios from 'axios';
-
+    import Alert from './Alert.vue';
     export default {
         data() {
             return {
+                message:"",
                 alerts: [],
                 loginForm: {
                     email: '',
                 }
             };
         },
-
+        components:{
+            alert:Alert,
+        },
         methods: {
             handleLoginSubmit() {
                 const payload = {
@@ -50,6 +54,9 @@
                 axios.get(path)
                     .then((res) => {
                         this.alerts = res.data.alerts;
+                        if(this.alerts.length >0){
+                           this.message=this.alerts[0];
+                        }
                     })
                     .catch((error) => {
                         console.error(error);
