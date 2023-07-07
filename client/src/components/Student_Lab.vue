@@ -6,7 +6,7 @@
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
             <form>
                 <label for="addAnswer" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
-                <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer"> 
+                <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num]"> 
                     Enter answer here!
                 </textarea>
                 <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
@@ -32,7 +32,7 @@ export default {
             socket: undefined,
             questionForm: {
                 id:'',
-                answer: '',
+                answer: {},
       
             },
         };
@@ -43,6 +43,7 @@ export default {
             axios.get(path)
                 .then((res) => {
                     this.questions = res.data.questions;
+                    this.answer=res.data.answers;
                 })
                 .catch((error) => {
                    console.log("error");
@@ -67,16 +68,18 @@ export default {
         handleSubmit(question) {
             if (question) {
                 this.questionForm.id= question.order_num 
+               
             };
+            console.log(this.questionForm.answer);
             const payload = {
                 answer: this.questionForm.answer,
                 id: this.questionForm.id,
             };
             this.addAnswer(payload);
-            this.initForm();
+           
         },
         initForm() {
-            this.questionForm.answer = '';
+            this.questionForm.answer = {};
             this.questionForm.id ='';
         },
 
