@@ -322,13 +322,14 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
         response_object['message'] = 'Question saved!'
         print( "commit succesfull")
         group = Group.query.get(group_num)
-        if int(post_data.get("id")) > group.progress:
+        print(group)
+        if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
             print(group.progress)
             db.session.add(group)
             db.session.commit()
             session_id = group.session_id
-            emit('progress_update', group_num, int(post_data.get("id")), to=str(session_id))
+            socketio.emit('progress_update', group_num, int(post_data.get("id")), to=str(session_id))
 
     return jsonify (response_object)
 
