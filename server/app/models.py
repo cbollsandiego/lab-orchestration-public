@@ -75,7 +75,7 @@ class Group(db.Model):
     max_progress = db.Column(db.Integer)
 
     def __repr__(self):
-        return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id})"
+        return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id}, hand_raised={self.hand_raised}, at_checkpoint={self.at_checkpoint})"
 
 @event.listens_for(Group, 'before_delete')
 def remove_users_from_group(mapper, connection, target):
