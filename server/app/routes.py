@@ -334,7 +334,19 @@ def connect_test():
 
 @socketio.on('command_send')
 def send_command(group_id, command):
-    session_id = Group.query.get(group_id).session_id
+    group = Group.query.get(group_id)
+    session_id = group.session_id
+    match command: 
+        case "handup":
+            group.hand_raised = True
+        case "handdown":
+            group.hand_raised = False
+        case "checkon":
+            group.at_checkpoint = True
+        case "checkoff":
+            group.at_checkpoint = False
+    db.session.add(group)
+    db.session.commit()
     print(str(group_id))
     emit('command', (group_id, command), to=str(session_id))
 
