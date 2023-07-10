@@ -39,7 +39,7 @@ export default {
     },
     methods: {
         getQuestions() {
-            const path = 'http://localhost:5001/comp110/sp23/1/2/2';
+            const path = 'http://localhost:5001/${this.$route.params.course_name}/sp23/1/2/2';
             axios.get(path)
                 .then((res) => {
                     this.questions = res.data.questions;

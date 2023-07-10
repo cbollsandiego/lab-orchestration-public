@@ -1,6 +1,8 @@
 <template>
     <div> 
-        <alert :message="message"></alert>
+        <div v-if="message!=''">
+            <alert :message="message"></alert>
+        </div>
       <form>
         <div class="mb-3">
             <label for="loginEmail" class="form-label">Email:</label>
@@ -19,8 +21,7 @@
     export default {
         data() {
             return {
-                message:"",
-                alerts: [],
+                message: "",
                 loginForm: {
                     email: '',
                 }
@@ -33,6 +34,7 @@
             handleLoginSubmit() {
                 const payload = {
                     email: this.loginForm.email,
+                    alerts: this.alerts,
                 };
                 this.checkEmail(payload);
                 this.initForm();
@@ -40,8 +42,12 @@
             checkEmail(payload) {
                 const path = 'http://localhost:5001/login';
                 axios.post(path, payload)
-                    .then(() => {
+                    .then((res) => {
                         this.getLogin();
+                        if (res.data.alerts) {
+                            this.message = res.data.alerts;
+                        }
+                        
                     })
                     .catch((error) => {
 
@@ -53,9 +59,9 @@
                 const path = 'http://localhost:5001/login';
                 axios.get(path)
                     .then((res) => {
-                        this.alerts = res.data.alerts;
-                        if(this.alerts.length >0){
-                           this.message=this.alerts[0];
+                        this.message = res.data.alerts;
+                        if (res.data.alerts) {
+                            this.message = res.data.alerts;
                         }
                     })
                     .catch((error) => {

@@ -25,20 +25,17 @@ def login():
     data = {}
     if current_user.is_authenticated:
         logout_url = url_for('logout')
-        data['alerts'] = (f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.')
-        #return redirect(url_for('index'))
-    #form = LoginForm()
+        data['alerts'] = f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.'
+
     if request.method == "POST":
         print("we got a post!")
         post_data = request.get_json()
         user = User.query.filter_by(email=post_data.get("email")).first()
         if user is None:
             data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
-            #return redirect(url_for('login'))
         else:
             login_user(user, remember=False)
             data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
-        #return redirect(url_for('index'))
     print(data)
     return jsonify(data)
 
