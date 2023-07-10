@@ -1,6 +1,16 @@
 <template>
     <div class="container">
         <p>Lab {{ $route.params.lab_num }}</p>
+        <div class="container">
+  <div class="row" >
+    <div class="col-1 border border-primary border-3 rounded-circle " v-for="index in 5" style="width:30px ; height: 30px; background-color: blue;">
+      1
+    </div>
+    <div class="col-1 border border-primary border-3 rounded-circle " v-for="index in 5" style="width:30px ; height: 30px; background-color: white">
+      1
+    </div>
+  </div>
+</div>
         <input type="submit" value="Raise hand" @click="sendCommand('handup')">
         <input type="submit" value="Lower hand" @click="sendCommand('handdown')">
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
@@ -14,16 +24,16 @@
                     <h4>
                         Check Point.
                     </h4>
-                    
+
                     <input type="radio" value="First checkpoint" @click="sendCommand('At a checkpoint')" name="Si"
                         id="First Checkpoint" disabled="disabled" checked="checked">Yes<br>
 
-                    
+
                     <input type="radio" value="First checkpoint" @click="sendCommand('At a checkpoint')" name="Si"
-                        id="First Checkpoint" disabled="disabled" checked="checked" >...<br>
-                
-                
-        
+                        id="First Checkpoint" disabled="disabled" checked="checked">...<br>
+
+
+
                 </div>
             </form>
         </div>
@@ -60,7 +70,7 @@ export default {
         },
         sendCommand(command) {
             this.socket.emit('command_send', this.$route.params.group, command);
-          
+
         },
         addAnswer(payload) {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.lab_num}/${this.$route.params.group}`;
@@ -97,18 +107,18 @@ export default {
         this.getQuestions();
         this.socket = io("127.0.0.1:5001");
         this.socket.emit("enter_room", this.$route.params.session);
-    }, 
+    },
     EnableDisableTextbox() {
 
 
         // EnableDisableTextBox() {
-       // if ($(''))
-       // this.get...("...).display = display.hidden;
+        // if ($(''))
+        // this.get...("...).display = display.hidden;
 
 
 
 
-    //}
+        //}
 
 
 
@@ -119,5 +129,7 @@ export default {
 
 </script>
 
-<!--progress hceckpoint bar?-->
+<!--progress  bar?-->
+
+
 
