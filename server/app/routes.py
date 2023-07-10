@@ -278,31 +278,31 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
     # the file is beung read through a string (change to read from file)
     f="""[
     {
-        "order_num": 0,
+        "order_num": 1,
         "title": "What are the names of all the files in the repository you just cloned?",
         "type": "Question",
         "checkpoint": false
     },
     {
-        "order_num": 1,
+        "order_num": 2,
         "title": "What symbols are used to indicate that the REPL is ready for you to enter a statement?",
         "type": "Question",
         "checkpoint": false
     },
     {
-        "order_num": 2,
+        "order_num": 3,
         "title": "Draw a square",
         "type": "Exercise",
         "checkpoint": false
     },
     {
-        "order_num": 3,
+        "order_num": 4,
         "title": "What code did you write? Copy and paste that code for the answer to this question. Include only the Python code, not the “>>>” that indicates that you are in the REPL.",
         "type": "Question",
         "checkpoint": true
     },
     {
-        "order_num": 4,
+        "order_num": 5,
         "title": "What is the third oldest line of code in your Python REPL history? If the arrow keys arent working for you, put “Arrow Keys Dont Work :(” for your answer.",
         "type": "Question",
         "checkpoint": false
@@ -329,7 +329,7 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
             db.session.add(group)
             db.session.commit()
             session_id = group.session_id
-            socketio.emit('progress_update', group_num, int(post_data.get("id")), to=str(session_id))
+            socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
 
     return jsonify (response_object)
 
