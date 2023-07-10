@@ -17,7 +17,7 @@ export default {
         }
     },
     created() {
-        this.socketio = io("127.0.0.1:5000");
+        this.socketio = io("127.0.0.1:5001");
         this.socketio.emit('enter_room', this.$route.params.sessionId);
     },
     components: {

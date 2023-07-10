@@ -69,6 +69,10 @@ class Group(db.Model):
     group_name = db.Column(db.String(100))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
+    hand_raised = db.Column(db.Boolean, default=False)
+    at_checkpoint = db.Column(db.Boolean, default=False)
+    progress = db.Column(db.Integer, default=0)
+    max_progress = db.Column(db.Integer)
 
     def __repr__(self):
         return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id})"
@@ -84,6 +88,7 @@ class Labs(db.Model):
     questions=db.Column(db.String)
     answers=db.Column(db.String)
     lab_num=db.Column(db.Integer,nullable=False , unique=True)
+    num_questions = db.Column(db.Integer)
 
 class Student_lab (db.Model): 
    __tablename__= "student_answers"
