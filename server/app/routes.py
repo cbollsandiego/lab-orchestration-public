@@ -265,7 +265,7 @@ def lab_fetcher(session_id):
         students = User.query.join(user_group).filter(user_group.c.group_id == group.id).all()
         for student in students:
             student_names.append(student.name)
-        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id})
+        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
     #response = jsonify(dict)
     return dict
 
