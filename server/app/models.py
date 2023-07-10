@@ -30,6 +30,13 @@ class User(UserMixin, db.Model):
     def profile_photo(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
+    
+    def serialize(self):
+        return {"id": self.id,
+                "name": self.name,
+                "email": self.email,
+                "role": self.role,
+                }
 
 @event.listens_for(User, 'before_delete')
 def remove_courses_from_user(mapper, connection, target):

@@ -54,12 +54,11 @@ def user(user_id):
     form = EmptyForm() if current_user.role == 'admin' else None
     return render_template('user.html', user=user, form=form)
 
-@app.route('/user_list')
-@login_required
-@admin_required
+@app.route('/userlist')
 def user_list():
     users = User.query.all()
-    return render_template('user_list.html', users=users)
+    json_users = [user.serialize() for user in users]
+    return jsonify(json_users) 
 
 @app.route('/create_user', methods=['GET', 'POST'])
 @login_required
