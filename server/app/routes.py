@@ -271,7 +271,7 @@ def lab_fetcher(session_id):
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
 def student_view(course_name,lab_num,group_num,semester,section_num):
-
+    print("got to page")
     #lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
     course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
     

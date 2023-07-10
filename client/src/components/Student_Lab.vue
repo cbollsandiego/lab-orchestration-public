@@ -6,7 +6,7 @@
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
             <form>
                 <label for="addAnswer" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
-                <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num]"> 
+                <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num]">
                     Enter answer here!
                 </textarea>
                 <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
@@ -14,8 +14,16 @@
                     <h4>
                         Check Point.
                     </h4>
-                    <input type="radio" name="Si">Yes<br>
-                    <input type="radio" name="Si">No<br>
+                    
+                    <input type="radio" value="First checkpoint" @click="sendCommand('At a checkpoint')" name="Si"
+                        id="First Checkpoint" disabled="disabled" checked="checked">Yes<br>
+
+                    
+                    <input type="radio" value="First checkpoint" @click="sendCommand('At a checkpoint')" name="Si"
+                        id="First Checkpoint" disabled="disabled" checked="checked" >...<br>
+                
+                
+        
                 </div>
             </form>
         </div>
@@ -31,33 +39,34 @@ export default {
             questions: [],
             socket: undefined,
             questionForm: {
-                id:'',
+                id: '',
                 answer: {},
-      
+
             },
         };
     },
     methods: {
         getQuestions() {
-            const path = 'http://localhost:5001/comp110/sp23/1/2/2';
+            const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.lab_num}/${this.$route.params.group}`;
             axios.get(path)
                 .then((res) => {
                     this.questions = res.data.questions;
-                    this.answer=res.data.answers;
+                    this.answer = res.data.answers;
                 })
                 .catch((error) => {
-                   console.log("error");
+                    console.log("error");
                     console.error(error);
                 });
         },
         sendCommand(command) {
             this.socket.emit('command_send', this.$route.params.group, command);
+          
         },
         addAnswer(payload) {
-            const path = 'http://localhost:5001/comp110/sp23/1/2/2';
+            const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.lab_num}/${this.$route.params.group}`;
             axios.post(path, payload)
-              .then(() => {
-                  this.getQuestions();
+                .then(() => {
+                    this.getQuestions();
                 })
                 .catch((error) => {
 
@@ -67,8 +76,8 @@ export default {
         },
         handleSubmit(question) {
             if (question) {
-                this.questionForm.id= question.order_num 
-               
+                this.questionForm.id = question.order_num
+
             };
             console.log(this.questionForm.answer);
             const payload = {
@@ -76,19 +85,39 @@ export default {
                 id: this.questionForm.id,
             };
             this.addAnswer(payload);
-           
+
         },
         initForm() {
             this.questionForm.answer = {};
-            this.questionForm.id ='';
+            this.questionForm.id = '';
         },
 
-    }, 
+    },
     created() {
         this.getQuestions();
         this.socket = io("127.0.0.1:5001");
         this.socket.emit("enter_room", this.$route.params.session);
-    },
+    }, 
+    EnableDisableTextbox() {
+
+
+        // EnableDisableTextBox() {
+       // if ($(''))
+       // this.get...("...).display = display.hidden;
+
+
+
+
+    //}
+
+
+
+    }
 };
+
+
+
 </script>
-  
+
+<!--progress hceckpoint bar?-->
+
