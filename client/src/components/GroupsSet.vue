@@ -26,6 +26,7 @@
 
 <script>
 import GroupInfo from './GroupInfo.vue'
+import axios from 'axios'
 export default {
     name: 'GroupsSet',
     props: {
@@ -40,15 +41,22 @@ export default {
         }
     },
     async created() {
-        const response = await fetch("http://127.0.0.1:5000/labs/fetch/" + this.$route.params.sessionId);
-        const data = await response.json();
-        for(var i = 0; i < data.length; i++) {
-            data[i].score = 0;
-            data[i].handRaised = false;
-            data[i].atCheckpoint = false;
-            data[i].progress = 0;
-        }
-        this.groups = data
+        var data;
+        axios.get("http://127.0.0.1:5000/labs/fetch/" + this.$route.params.sessionId)
+            .then((res) => {
+                data = res.data;
+                for(var i = 0; i < data.length; i++) {
+                    data[i].score = 0;
+                    data[i].handRaised = false;
+                    data[i].atCheckpoint = false;
+                    data[i].progress = 0;
+                }
+                this.groups = data
+            })
+            .catch((error) => {
+                console.log(error)
+            });
+        
     },
     mounted() {
         this.socket.on('command', (groupId, command) => {
@@ -61,7 +69,7 @@ export default {
             };
             var value = 0;
             group.handRaised ? value+=2 : value += 0;
-            group.atCheckpoint ? value++ :  value += 0;
+            group.atCheckpoint ? value+=1 :  value += 0;
             group.score = value;
             this.updateGroups();
         });
