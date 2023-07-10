@@ -314,7 +314,9 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
         post_data = request.get_json()
         now = datetime.now()
         print(post_data.get("id"))
-        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer"),course_id=course)
+        print(post_data.get("answer"))
+        response_object["answers"]=post_data.get("answer")
+        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer")[str(post_data.get("id"))],course_id=course)
         db.session.add(student_lab) 
         db.session.commit()
         response_object['message'] = 'Question saved!'
