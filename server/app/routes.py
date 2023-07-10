@@ -344,7 +344,7 @@ def connect_test():
 def send_command(group_id, command):
     group = Group.query.get(group_id)
     session_id = group.session_id
-    match command: 
+    '''match command: 
         case "handup":
             group.hand_raised = True
         case "handdown":
@@ -352,7 +352,15 @@ def send_command(group_id, command):
         case "checkon":
             group.at_checkpoint = True
         case "checkoff":
-            group.at_checkpoint = False
+            group.at_checkpoint = False'''
+    if command == "handup":
+        group.hand_raised = True
+    elif command == "handdown":
+        group.hand_raised = False
+    elif command == "checkon":
+        group.at_checkpoint = True
+    elif command == "checkoff":
+        group.at_checkpoint = False
     db.session.add(group)
     db.session.commit()
     print(str(group_id))
