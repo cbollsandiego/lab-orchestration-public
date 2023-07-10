@@ -1,7 +1,4 @@
 <template>
-    <groups-set
-        :socket="socketio">
-    </groups-set>
 </template>
 
 <script>
