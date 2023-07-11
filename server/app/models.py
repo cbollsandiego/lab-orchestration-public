@@ -87,7 +87,9 @@ class Labs(db.Model):
     title= db.Column(db.String, nullable=False , unique=True)
     questions=db.Column(db.String)
     answers=db.Column(db.String)
+    #remove answers, add as a part of the questions
     lab_num=db.Column(db.Integer,nullable=False , unique=True)
+    #Remove lab_num
     num_questions = db.Column(db.Integer)
 
 class Student_lab (db.Model): 
