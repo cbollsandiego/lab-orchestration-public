@@ -13,24 +13,25 @@
                 </div>
             </div>
         </div>
-        <input type="submit" value="Raise hand" @click="sendCommand('handup')">
+        <input type="submit" value="Raise hand" @click="sendCommand('handup')" style="color:blue">
         <input type="submit" value="Lower hand" @click="sendCommand('handdown')">
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
             <form v-if=" parseInt(question.order_num) <= progress+1">
                 <label for="addAnswer" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
-                <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num]">
+                <textarea  class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num].answer">
                     Enter answer here!
                 </textarea>
+    
                 <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
                 <div v-if="question.checkpoint">
                     <h4>
                         Check Point.
                     </h4>
                 
-                    <input type="radio"  value="Yes" @click="sendCommand('At a checkpoint')" name="Si" id="yes" 
-                        checked="checked">Yes<br>
+                    <input type="radio"  value="Yes" @click="sendCommand('')" name="Si" id="yes" 
+                        checked="checked">Yes "<br>
                
-                    <input type="radio"  value="No" @click="sendCommand('At a checkpoint')" name="Si" id="no" 
+                    <input type="radio"  value="No" @click="sendCommand('')" name="Si" id="no" 
                         checked="checked">No<br>
                     
 
@@ -67,9 +68,10 @@ export default {
             axios.get(path)
                 .then((res) => {
                     this.questions = res.data.questions;
-                    this.answer = res.data.answers;
+                    this.questionForm.answer = res.data.answers;
                     this.progress = res.data.progress;
                     this.total_questions = res.data.total_questions;
+                    
                 })
                 .catch((error) => {
                     console.log("error");
@@ -116,20 +118,16 @@ export default {
         this.socket = io("127.0.0.1:5001");
         this.socket.emit("enter_room", this.$route.params.session);
     },
-    EnableDisableTextbox() {
-
-    
-        // EnableDisableTextBox() {
-        // if ($(''))
-        // this.get...("...).display = display.hidden;
-
-        
-
+    updateForm (input, value ) {
+        this.form[input]= value
 
         //}
 
-
-
+      //  saving data after refresh
+      localStorage
+      sessionStorage
+      v-model
+      input.value = input.value.replace(); input.saveValue()
     }
 };
 
