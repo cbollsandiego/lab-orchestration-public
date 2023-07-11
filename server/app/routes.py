@@ -309,7 +309,8 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
     }
     ]"""
     raw_results = json.loads(f)
-    response_object = {"status":"success","questions": raw_results}
+    print(len(raw_results))
+    response_object = {"status":"success","questions": raw_results,"progress":0,"total_questions": (len(raw_results))}
     if request.method == 'POST':
         post_data = request.get_json()
         now = datetime.now()
@@ -325,12 +326,14 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
         print(group)
         if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
+            response_object["progress"]= int(post_data.get("id"))
             print(group.progress)
             db.session.add(group)
             db.session.commit()
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
-
+    progress=Group.query.get(group_num).progress
+    response_object['progress']=progress
     return jsonify (response_object)
 
 
