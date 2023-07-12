@@ -274,7 +274,7 @@ def lab_fetcher(session_id):
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
 def student_view(course_name,lab_num,group_num,semester,section_num):
-    print("got to page")
+    
     #lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
     course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
     
@@ -311,51 +311,53 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
         "checkpoint": false
     }
     ]"""
+
     raw_results = json.loads(f)
-    #print(len(raw_results))
-    response_object = {"status":"success","questions": raw_results,"progress":0,"total_questions": (len(raw_results)), "answers":{}}
+    
+    response_object = {"status":"success",
+                       "questions": raw_results,
+                       "progress":0,
+                       "total_questions": (len(raw_results)), 
+                       "answers":{}}
     if request.method == 'POST':
         post_data = request.get_json()
         now = datetime.now()
-        #print(post_data.get("id"))
-        #print(post_data.get("answer"))
-        response_object["answers"]=post_data.get("answer")
-        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer")[str(post_data.get("id"))]
-        ,course_id=course)
+        
+        student_lab=Student_lab(
+            question_num= int(post_data.get("id")), 
+            group_name=group_num, 
+            submit_time=now,
+            saved_answer=post_data.get("answer")[str(post_data.get("id"))],
+            course_id=course)
+        
         db.session.add(student_lab) 
         db.session.commit()
-        response_object['message'] = 'Question saved!'
-        print( "commit succesfull")
+       
         group = Group.query.get(group_num)
-        #print(group)
         if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
-            response_object["progress"]= int(post_data.get("id"))
-           # print(group.progress)
             db.session.add(group)
             db.session.commit()
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
+    
     progress=Group.query.get(group_num).progress
     response_object['progress']=progress
+
     answers=Student_lab.query.filter_by (group_name=group_num, course_id=course).all()
     for answer in answers:
-       #print("check", answer.saved_answer,answer.submit_time,answer.question_num)
-       if response_object ['answers'].get(str(answer.question_num))==None:
-           response_object ['answers'][str(answer.question_num)]={"answer":answer.saved_answer,"time": answer.submit_time}
-           #print("original", response_object["answers"][answer.question_num],answer.question_num)
-       else:
-            
-            if answer.submit_time > response_object["answers"][str(answer.question_num)]["time"]:
-               response_object ['answers'][str(answer.question_num)]={"answer":answer.saved_answer,"time": answer.submit_time}
-               #print("update", response_object["answers"][answer.question_num],answer.question_num)
-    for i in range(1, len(raw_results)+1):
-        if response_object["answers"].get(str(i))==None:
-            response_object["answers"][str(i)]=""
+        if response_object['answers'].get(answer.question_num)==None:
+            response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
         else:
-            response_object["answers"][str(i)]=str(response_object["answers"][str(i)]["answer"])
+            if answer.submit_time > response_object["answers"][answer.question_num]["time"]:
+               response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
+    for i in range(1, len(raw_results)+1):
+        if response_object["answers"].get(i)==None:
+            response_object["answers"][i]= ""
+        else:
+            response_object["answers"][i]=response_object["answers"][i]["answer"]
     print(response_object["answers"])
-    return jsonify (response_object)
+    return jsonify(response_object)
 
 
 
