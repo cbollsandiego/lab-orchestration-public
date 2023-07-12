@@ -7,8 +7,8 @@
                     style="width:30px ; height: 30px; background-color: blue;">
                     1
                 </div>
-                <div class="col-1 border border-primary border-3 rounded-circle " v-for="index in total_questions - progress"
-                    style="width:30px ; height: 30px; background-color: white">
+                <div class="col-1 border border-primary border-3 rounded-circle "
+                    v-for="index in total_questions - progress" style="width:30px ; height: 30px; background-color: white">
                     1
                 </div>
             </div>
@@ -16,24 +16,23 @@
         <input type="submit" value="Raise hand" @click="sendCommand('handup')" style="color:blue">
         <input type="submit" value="Lower hand" @click="sendCommand('handdown')">
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
-            <form v-if=" parseInt(question.order_num) <= progress+1">
+            <form v-if="parseInt(question.order_num) <= progress + 1">
                 <label for="addAnswer" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
-                <textarea  class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num].answer">
+                <textarea class="form-control" :id="question.order_num"
+                    v-model="questionForm.answer[question.order_num]">
                     Enter answer here!
                 </textarea>
-    
                 <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
+                <alert :message="message" v-if="showMessage" ></alert>
                 <div v-if="question.checkpoint">
                     <h4>
                         Check Point.
                     </h4>
-                
-                    <input type="radio"  value="Yes" @click="sendCommand('')" name="Si" id="yes" 
-                        checked="checked">Yes "<br>
-               
-                    <input type="radio"  value="No" @click="sendCommand('')" name="Si" id="no" 
-                        checked="checked">No<br>
-                    
+
+                    <input type="radio" value="Yes" @click="sendCommand('')" name="Si" id="yes" checked="checked">Yes "<br>
+
+                    <input type="radio" value="No" @click="sendCommand('')" name="Si" id="no" checked="checked">No<br>
+
 
 
 
@@ -42,10 +41,14 @@
             </form>
         </div>
     </div>
+
+
+    
 </template>
 
 <script>
 import axios from 'axios';
+import Alert from './Alert.vue';
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 export default {
     data() {
@@ -54,14 +57,21 @@ export default {
             progress: 0,
             total_questions: 0,
             socket: undefined,
+            messsage:'',
+            showMessage: false,
             questionForm: {
                 id: '',
                 answer: {},
-
-
             },
+
         };
     },
+    components: {
+        alert: Alert
+        
+    },
+
+
     methods: {
         getQuestions() {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.lab_num}/${this.$route.params.group}`;
@@ -71,7 +81,7 @@ export default {
                     this.questionForm.answer = res.data.answers;
                     this.progress = res.data.progress;
                     this.total_questions = res.data.total_questions;
-                    
+
                 })
                 .catch((error) => {
                     console.log("error");
@@ -87,11 +97,14 @@ export default {
             axios.post(path, payload)
                 .then(() => {
                     this.getQuestions();
+                    this.message = 'Answer saved';
+                    this.showMessage = true;
                 })
                 .catch((error) => {
 
                     console.log(error);
                     this.getQuestions();
+                    this.showMessage = true;
                 });
         },
         handleSubmit(question) {
@@ -110,6 +123,7 @@ export default {
         initForm() {
             this.questionForm.answer = {};
             this.questionForm.id = '';
+            // this.addAnswer='';
         },
 
     },
@@ -118,18 +132,18 @@ export default {
         this.socket = io("127.0.0.1:5001");
         this.socket.emit("enter_room", this.$route.params.session);
     },
-    updateForm (input, value ) {
-        this.form[input]= value
+    //updateForm (input, value ) {
+    // this.form[input]= value
 
-        //}
+    //}
 
-      //  saving data after refresh
-      localStorage
-      sessionStorage
-      v-model
-      input.value = input.value.replace(); input.saveValue()
-    }
-};
+    //  saving data after refresh
+    //localStorage
+    //sessionStorage
+    //v-model
+    //input.value = input.value.replace(); input.saveValue()
+}
+//};
 
 
 

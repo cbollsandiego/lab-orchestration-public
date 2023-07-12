@@ -10,6 +10,9 @@ from collections import namedtuple
 from flask_socketio import emit, join_room
 from datetime import datetime
 
+
+
+
 @app.route('/')
 @login_required
 def index():
@@ -317,7 +320,8 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
         #print(post_data.get("id"))
         #print(post_data.get("answer"))
         response_object["answers"]=post_data.get("answer")
-        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer")[str(post_data.get("id"))]["answer"],course_id=course)
+        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer")[str(post_data.get("id"))]
+        ,course_id=course)
         db.session.add(student_lab) 
         db.session.commit()
         response_object['message'] = 'Question saved!'
@@ -337,13 +341,19 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
     answers=Student_lab.query.filter_by (group_name=group_num, course_id=course).all()
     for answer in answers:
        #print("check", answer.saved_answer,answer.submit_time,answer.question_num)
-       if response_object ['answers'].get(answer.question_num)==None:
-           response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
+       if response_object ['answers'].get(str(answer.question_num))==None:
+           response_object ['answers'][str(answer.question_num)]={"answer":answer.saved_answer,"time": answer.submit_time}
            #print("original", response_object["answers"][answer.question_num],answer.question_num)
        else:
-           if answer.submit_time > response_object["answers"][answer.question_num]["time"]:
-               response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
+            
+            if answer.submit_time > response_object["answers"][str(answer.question_num)]["time"]:
+               response_object ['answers'][str(answer.question_num)]={"answer":answer.saved_answer,"time": answer.submit_time}
                #print("update", response_object["answers"][answer.question_num],answer.question_num)
+    for i in range(1, len(raw_results)+1):
+        if response_object["answers"].get(str(i))==None:
+            response_object["answers"][str(i)]=""
+        else:
+            response_object["answers"][str(i)]=str(response_object["answers"][str(i)]["answer"])
     print(response_object["answers"])
     return jsonify (response_object)
 
