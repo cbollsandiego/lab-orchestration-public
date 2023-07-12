@@ -152,11 +152,12 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-@login_required
-@instructor_required
+#@login_required
+#@instructor_required
 def course_list():
     courses = Course.query.all()
-    return render_template('course_list.html', courses=courses)
+    json_users = [course.serialize() for course in courses]
+    return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
 @login_required

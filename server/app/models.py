@@ -65,6 +65,14 @@ class Course(db.Model):
     def get_students(self):
         students = User.query.join(user_course, (user_course.c.user_id == User.id)
                             ).filter_by(user_course.c.course_id == self.id)
+        
+    def serialize(self):
+        return {"id": self.id,
+                "course_name": self.course_name,
+                "semester": self.semester,
+                "section_num": self.section_num,
+                "course_instructor": self.course_instructor
+                }
 
 
 @event.listens_for(Course, 'before_delete')
