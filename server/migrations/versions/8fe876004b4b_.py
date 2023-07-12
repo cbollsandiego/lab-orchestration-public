@@ -1,8 +1,8 @@
-"""Initial migration
+"""empty message
 
-Revision ID: a93c6a7ebf29
+Revision ID: 8fe876004b4b
 Revises: 
-Create Date: 2023-07-05 11:00:00.932707
+Create Date: 2023-07-12 09:56:06.168251
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a93c6a7ebf29'
+revision = '8fe876004b4b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,6 +24,7 @@ def upgrade():
     sa.Column('questions', sa.String(), nullable=True),
     sa.Column('answers', sa.String(), nullable=True),
     sa.Column('lab_num', sa.Integer(), nullable=False),
+    sa.Column('num_questions', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('lab_id'),
     sa.UniqueConstraint('lab_num'),
     sa.UniqueConstraint('title')
@@ -38,7 +39,9 @@ def upgrade():
     )
     op.create_table('course',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('course_name', sa.String(length=100), nullable=True),
+    sa.Column('course_name', sa.String(length=100), nullable=False),
+    sa.Column('semester', sa.String(), nullable=True),
+    sa.Column('section_num', sa.Integer(), nullable=True),
     sa.Column('course_instructor', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['course_instructor'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -73,6 +76,10 @@ def upgrade():
     sa.Column('group_name', sa.String(length=100), nullable=True),
     sa.Column('course_id', sa.Integer(), nullable=True),
     sa.Column('session_id', sa.Integer(), nullable=True),
+    sa.Column('hand_raised', sa.Boolean(), nullable=True),
+    sa.Column('at_checkpoint', sa.Boolean(), nullable=True),
+    sa.Column('progress', sa.Integer(), nullable=True),
+    sa.Column('max_progress', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
     sa.ForeignKeyConstraint(['session_id'], ['session.id'], ),
     sa.PrimaryKeyConstraint('id')

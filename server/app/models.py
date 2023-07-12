@@ -85,12 +85,8 @@ class Labs(db.Model):
     __tablename__="labs"
     lab_id=db.Column(db.Integer, primary_key=True)
     title= db.Column(db.String, nullable=False , unique=True)
-    questions=db.Column(db.String)
-    answers=db.Column(db.String)
-    #remove answers, add as a part of the questions
-    lab_num=db.Column(db.Integer,nullable=False , unique=True)
-    #Remove lab_num
-    num_questions = db.Column(db.Integer)
+    questions=db.Column(db.String, nullable=False)
+    num_questions = db.Column(db.Integer, nullable=False)
 
 class Student_lab (db.Model): 
    __tablename__= "student_answers"

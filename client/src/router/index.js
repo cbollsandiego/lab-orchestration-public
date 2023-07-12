@@ -17,7 +17,7 @@ const router = createRouter({
       component: Student_Lab
     },
     {
-      path:'/create/lab/',
+      path:'/create/lab',
       name: 'Create Lab',
       component: CreateLab
 
