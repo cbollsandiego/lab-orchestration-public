@@ -4,7 +4,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-1 border border-primary border-3 rounded-circle " v-for="index in progress"
-                    style="width:30px ; height: 30px; background-color: blue;">
+                    style="width:30px ; height: 30px; background-color: rgb(240, 170, 78);">
                     1
                 </div>
                 <div class="col-1 border border-primary border-3 rounded-circle "
@@ -23,7 +23,7 @@
                     Enter answer here!
                 </textarea>
                 <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
-                <alert :message="message" v-if="showMessage" ></alert>
+                <alert :message="message" v-if="(question.order_num)== click && showMessage" @click="showMessage=false" ></alert>
                 <div v-if="question.checkpoint">
                     <h4>
                         Check Point.
@@ -43,7 +43,7 @@
     </div>
 
 
-    
+
 </template>
 
 <script>
@@ -58,6 +58,7 @@ export default {
             total_questions: 0,
             socket: undefined,
             messsage:'',
+            click: '',
             showMessage: false,
             questionForm: {
                 id: '',
@@ -99,6 +100,7 @@ export default {
                     this.getQuestions();
                     this.message = 'Answer saved';
                     this.showMessage = true;
+                    this.click = payload.id
                 })
                 .catch((error) => {
 
