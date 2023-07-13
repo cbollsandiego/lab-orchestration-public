@@ -23,20 +23,25 @@ def test(session_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    data = {}
     if current_user.is_authenticated:
         logout_url = url_for('logout')
-        flash(Markup(
-            f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.'))
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        data['alerts'] = (f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.')
+        #return redirect(url_for('index'))
+    #form = LoginForm()
+    if request.method == "POST":
+        print("we got a post!")
+        post_data = request.get_json()
+        user = User.query.filter_by(email=post_data.get("email")).first()
         if user is None:
-            flash(f'{form.email.data} was not found in the database. Try again!')
-            return redirect(url_for('login'))
-        login_user(user, remember=False)
-        return redirect(url_for('index'))
-    return render_template('login.html', form=form)
+            data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
+            #return redirect(url_for('login'))
+        else:
+            login_user(user, remember=False)
+            data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
+        #return redirect(url_for('index'))
+    print(data)
+    return jsonify(data)
 
 @app.route('/logout')
 def logout():
@@ -50,12 +55,11 @@ def user(user_id):
     form = EmptyForm() if current_user.role == 'admin' else None
     return render_template('user.html', user=user, form=form)
 
-@app.route('/user_list')
-@login_required
-@admin_required
+@app.route('/userlist')
 def user_list():
     users = User.query.all()
-    return render_template('user_list.html', users=users)
+    json_users = [user.serialize() for user in users]
+    return jsonify(json_users) 
 
 @app.route('/create_user', methods=['GET', 'POST'])
 @login_required
@@ -149,11 +153,12 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-@login_required
-@instructor_required
+#@login_required
+#@instructor_required
 def course_list():
     courses = Course.query.all()
-    return render_template('course_list.html', courses=courses)
+    json_users = [course.serialize() for course in courses]
+    return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
 @login_required
