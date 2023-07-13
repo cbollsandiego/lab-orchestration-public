@@ -8,8 +8,47 @@ from app.helpers.process_csv import read_csv
 import json
 from collections import namedtuple
 from flask_socketio import emit, join_room
-from datetime import datetime
+from datetime import datetime, timedelta
 import jwt
+from functools import wraps
+
+def token_required(f):
+    @wraps(f)
+    def _verify(*args, **kwargs):
+        print(request.headers)
+        auth_headers = request.headers.get('Authorization', '').split()
+        print(auth_headers)
+
+        invalid_msg = {
+            'message': 'Invalid token. Registeration and / or authentication required',
+            'authenticated': False
+        }
+        expired_msg = {
+            'message': 'Expired token. Reauthentication required.',
+            'authenticated': False
+        }
+
+        if len(auth_headers) != 1:
+            return jsonify(invalid_msg), 401
+
+        try:
+            token = auth_headers[0]
+            print(token)
+            header_data = jwt.get_unverified_header(token)
+            print(header_data)
+            data = jwt.decode(token, app.config['SECRET_KEY'], [header_data['alg']])
+            user = User.query.filter_by(email=data['sub']).first()
+            print(user)
+            if not user:
+                raise RuntimeError('User not found')
+            return f(user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+        except (jwt.InvalidTokenError, Exception) as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+
+    return _verify
 
 @app.route('/')
 @login_required
@@ -21,27 +60,36 @@ def test(session_id):
     greeting = 'Rendering from Flask'
     return render_template('test.html', greeting=greeting, session_id=session_id)
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
     data = {}
-    if current_user.is_authenticated:
+    '''if current_user.is_authenticated:
         logout_url = url_for('logout')
         data['alerts'] = (f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.')
-        #return redirect(url_for('index'))
-    #form = LoginForm()
+        #return redirect(url_for('index'))'''
+    #form = LoginForm()*/
     if request.method == "POST":
         print("we got a post!")
         post_data = request.get_json()
-        user = User.query.filter_by(email=post_data.get("email")).first()
+        user = User.authenticate(**post_data)
+        print(user)
+        #user = User.query.filter_by(email=post_data.get("email")).first()
         if user is None:
             data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
+            return jsonify(data), 401
             #return redirect(url_for('login'))
         else:
-            login_user(user, remember=False)
+            token = jwt.encode({
+                'sub': user.email,
+                'iat': datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(minutes=120)},
+                app.config['SECRET_KEY']
+            )
+            print(token)
             data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
+            data['token'] = token
+            return jsonify(data)
         #return redirect(url_for('index'))
-    print(data)
-    return jsonify(data)
 
 @app.route('/logout')
 def logout():
@@ -153,16 +201,13 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-#@login_required
-#@instructor_required
-def course_list():
+@token_required
+def course_list(current_user):
     courses = Course.query.all()
     json_users = [course.serialize() for course in courses]
     return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
-@login_required
-@instructor_required
 def create_course():
     form = CreateCourseForm()
     if form.validate_on_submit():

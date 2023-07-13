@@ -35,7 +35,7 @@ class User(UserMixin, db.Model):
     @classmethod
     def authenticate(cls, **kwargs):
         email = kwargs.get('email')
-        password = kwargs.get('password')
+        password = kwargs.get('pass')
         if not email or not password:
             return None
         user = cls.query.filter_by(email=email).first()
