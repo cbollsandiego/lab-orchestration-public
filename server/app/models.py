@@ -30,6 +30,13 @@ class User(UserMixin, db.Model):
     def profile_photo(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
+    
+    def serialize(self):
+        return {"id": self.id,
+                "name": self.name,
+                "email": self.email,
+                "role": self.role,
+                }
 
 @event.listens_for(User, 'before_delete')
 def remove_courses_from_user(mapper, connection, target):
@@ -58,6 +65,14 @@ class Course(db.Model):
     def get_students(self):
         students = User.query.join(user_course, (user_course.c.user_id == User.id)
                             ).filter_by(user_course.c.course_id == self.id)
+        
+    def serialize(self):
+        return {"id": self.id,
+                "course_name": self.course_name,
+                "semester": self.semester,
+                "section_num": self.section_num,
+                "course_instructor": self.course_instructor
+                }
 
 
 @event.listens_for(Course, 'before_delete')

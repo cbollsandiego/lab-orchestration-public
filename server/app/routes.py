@@ -51,12 +51,11 @@ def user(user_id):
     form = EmptyForm() if current_user.role == 'admin' else None
     return render_template('user.html', user=user, form=form)
 
-@app.route('/user_list')
-@login_required
-@admin_required
+@app.route('/userlist')
 def user_list():
     users = User.query.all()
-    return render_template('user_list.html', users=users)
+    json_users = [user.serialize() for user in users]
+    return jsonify(json_users) 
 
 @app.route('/create_user', methods=['GET', 'POST'])
 @login_required
@@ -150,11 +149,12 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-@login_required
-@instructor_required
+#@login_required
+#@instructor_required
 def course_list():
     courses = Course.query.all()
-    return render_template('course_list.html', courses=courses)
+    json_users = [course.serialize() for course in courses]
+    return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
 @login_required
