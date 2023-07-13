@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container sticky-top bg-white ">
         <p>Lab {{ $route.params.lab_num }}</p>
         <div class="container">
             <div class="row">
@@ -13,8 +13,10 @@
                 </div>
             </div>
         </div>
-        <input type="submit" value="Raise hand" @click="sendCommand('handup')" style="color:blue">
-        <input type="submit" value="Lower hand" @click="sendCommand('handdown')">
+        <input type="submit" value="Raise hand" v-if="!handup" @click="sendCommand('handup'); hand_raised ('hand_raised')" >
+        <input type="submit" value="Lower hand" v-if="handup" @click="sendCommand('handdown'); hand_raised ('hand_lowered')"  >
+        </div>
+        <div class="container">
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
             <form v-if="parseInt(question.order_num) <= progress + 1">
                 <label for="addAnswer" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
@@ -23,7 +25,7 @@
                     Enter answer here!
                 </textarea>
                 <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
-                <alert :message="message" v-if="(question.order_num)== click && showMessage" @click="showMessage=false" ></alert>
+                <alert :message="message" v-if="(question.order_num) == click && showMessage" @click="showMessage=false" ></alert>
                 <div v-if="question.checkpoint">
                     <h4>
                         Check Point.
@@ -59,6 +61,7 @@ export default {
             socket: undefined,
             messsage:'',
             click: '',
+            handup:false,
             showMessage: false,
             questionForm: {
                 id: '',
@@ -112,6 +115,7 @@ export default {
         handleSubmit(question) {
             if (question) {
                 this.questionForm.id = question.order_num
+                t
 
             };
             console.log(this.questionForm.answer);
@@ -127,6 +131,15 @@ export default {
             this.questionForm.id = '';
             // this.addAnswer='';
         },
+        hand_raised(button_clicked) {
+            if( button_clicked=="hand_raised"){
+                this.handup= true;
+            }
+            else{
+                this.handup= false;
+            }
+        }
+    
 
     },
     created() {
@@ -134,16 +147,10 @@ export default {
         this.socket = io("127.0.0.1:5001");
         this.socket.emit("enter_room", this.$route.params.session);
     },
-    //updateForm (input, value ) {
-    // this.form[input]= value
+    //color_change() {
+        
 
-    //}
-
-    //  saving data after refresh
-    //localStorage
-    //sessionStorage
-    //v-model
-    //input.value = input.value.replace(); input.saveValue()
+  //  }
 }
 //};
 
