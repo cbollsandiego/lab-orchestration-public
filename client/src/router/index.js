@@ -23,6 +23,11 @@ const router = createRouter({
       path: '/:course_name/:semester/:section/:lab_num/:group/:session',
       name: 'Student_Lab',
       component: Student_Lab
+    },
+    {
+      path: '/courselist',
+      name: 'Course List',
+      component: CourseList
     }
       
   ]

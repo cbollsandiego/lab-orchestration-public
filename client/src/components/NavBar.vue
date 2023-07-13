@@ -9,9 +9,9 @@
               <a class="nav-link active" aria-current="page" href="#">My Courses</a>
               <a class="nav-link" href="#">Courses</a>
               <a class="nav-link" href="#">Users</a>
-              <router-link :to="{name: 'Create Lab'}">
+              <!--<router-link :to="{name: 'Create Lab'}">
                 <a class="nav-link">Labs</a>
-              </router-link>
+              </router-link> -->
             </div>
           </div>
           <button class="btn btn-outline-success" type="submit">Login</button>
