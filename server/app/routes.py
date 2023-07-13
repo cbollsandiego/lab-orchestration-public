@@ -298,14 +298,14 @@ def delete_group(group_id):
         return redirect(url_for('course', course_id=group.course_id))
     return redirect(url_for('index'))
 
-@app.route('/my_courses')
-@login_required
-def my_courses():
-    user = current_user
-    courses_taught = Course.query.filter_by(course_instructor=user.id).order_by(Course.course_name
-                            ).all() if user.role == 'admin' or user.role == 'instructor' else None
-    courses_in = Course.query.join(user_course).filter(user_course.c.user_id == user.id).order_by(Course.course_name).all()
-    return render_template('my_courses.html', courses_taught=courses_taught, courses_in=courses_in, user=user)
+@app.route('/mycourses')
+@token_required
+def my_courses(current_user):
+    courses_taught = Course.query.filter_by(course_instructor=current_user.id).order_by(Course.course_name).all()
+    courses_in = Course.query.join(user_course).filter(user_course.c.user_id == current_user.id).order_by(Course.course_name).all()
+    courses = courses_taught + courses_in
+    json_courses = [course.serialize() for course in courses]
+    return json_courses
 
 @app.route('/labs/fetch/<int:session_id>')
 def lab_fetcher(session_id):
@@ -317,7 +317,6 @@ def lab_fetcher(session_id):
         for student in students:
             student_names.append(student.name)
         dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
-    #response = jsonify(dict)
     return dict
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])

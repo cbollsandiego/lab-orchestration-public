@@ -86,11 +86,12 @@ class Course(db.Model):
                             ).filter_by(user_course.c.course_id == self.id)
         
     def serialize(self):
+        instructor = User.query.filter_by(id=self.course_instructor).first()
         return {"id": self.id,
                 "course_name": self.course_name,
                 "semester": self.semester,
                 "section_num": self.section_num,
-                "course_instructor": self.course_instructor
+                "course_instructor": instructor.name
                 }
 
 

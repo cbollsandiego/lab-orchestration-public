@@ -6,7 +6,9 @@
             </a>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-              <a class="nav-link active" aria-current="page" href="#">My Courses</a>
+              <router-link :to="{name: 'My Courses'}" class="route-link">
+                <a class="nav-link active">My Courses</a>
+              </router-link>
               <router-link :to="{name: 'Course List'}" class="route-link">
                 <a class="nav-link">Courses</a>
               </router-link>
