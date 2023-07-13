@@ -9,6 +9,7 @@ import json
 from collections import namedtuple
 from flask_socketio import emit, join_room
 from datetime import datetime
+import jwt
 
 @app.route('/')
 @login_required

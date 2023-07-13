@@ -2,6 +2,7 @@ from app import db, login
 from flask_login import UserMixin
 from sqlalchemy import event
 from hashlib import md5
+from werkzeug.security import generate_password_hash, check_password_hash
 
 user_course = db.Table('user_course',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -19,10 +20,28 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     courses = db.relationship('Course', secondary='user_course', backref='users')
 
     groups = db.relationship('Group', secondary='user_group', backref='users')
+
+    def __init__(self, name, email, role, password):
+        self.name = name
+        self.email = email
+        self.role = role
+        self.password = generate_password_hash(password, method='sha256')
+
+    @classmethod
+    def authenticate(cls, **kwargs):
+        email = kwargs.get('email')
+        password = kwargs.get('password')
+        if not email or not password:
+            return None
+        user = cls.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            return None
+        return user
 
     def __repr__(self):
         return f"User(id={self.id}, name='{self.name}', email='{self.email}', role='{self.role}')"
