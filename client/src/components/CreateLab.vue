@@ -256,7 +256,8 @@ html, body {
 }
 
 .create-lab-button {
-  margin-top: auto;
+  margin-bottom: auto;
+  margin-top: 5px;
 }
 
 .question-order {

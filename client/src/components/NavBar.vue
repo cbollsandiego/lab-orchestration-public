@@ -7,14 +7,19 @@
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
               <a class="nav-link active" aria-current="page" href="#">My Courses</a>
-              <a class="nav-link" href="#">Courses</a>
-              <a class="nav-link" href="#">Users</a>
-              <!--<router-link :to="{name: 'Create Lab'}">
-                <a class="nav-link">Labs</a>
-              </router-link> -->
+              <router-link :to="{name: 'Course List'}" class="route-link">
+                <a class="nav-link">Courses</a>
+              </router-link>
+              <router-link :to="{name: 'User List'}" class="route-link">
+                <a class="nav-link">Users</a>
+              </router-link>
+              <a class="nav-link">Labs</a>
             </div>
           </div>
-          <button class="btn btn-outline-success" type="submit">Login</button>
+          <router-link :to="{name: 'Login'}">
+            <button v-if="!loggedIn" class="btn btn-outline-success" type="submit">Login</button>
+          </router-link>
+          <button v-if="loggedIn" class="btn btn-outline-danger" type="submit" @click="logout">Logout</button>
         </div>
       </nav>
 </template>
@@ -23,12 +28,30 @@
 import { useLink } from 'vue-router';
 
 export default {
-    
+    data() {
+        return {
+            loggedIn: false
+        }
+    },
+    mounted() {
+        if(localStorage.getItem('token')) {
+            this.loggedIn = true
+        }
+    },
+    methods: {
+        logout(){
+            if(this.loggedIn) {
+                localStorage.removeItem('token')
+                this.loggedIn = false
+                this.$router.push({name: 'Login'})
+            }
+        }
+    }
 }
 </script>
 
 <style>
-    a {
+    .route-link {
         text-decoration: none;
     }
 </style>

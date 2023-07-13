@@ -28,8 +28,17 @@ const router = createRouter({
       path: '/courselist',
       name: 'Course List',
       component: CourseList
+    },
+    {
+      path: '/lab/create',
+      name: 'Lab Create',
+      component: CreateLab
+    },
+    {
+      path:'/userlist',
+      name: 'User List',
+      component: UserList
     }
-      
   ]
 })
 
