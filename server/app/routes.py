@@ -225,6 +225,14 @@ def create_course():
         return redirect(url_for('create_course'))
     return render_template('create_course.html', form=form)
 
+@app.route('/newcourse/getinstructors')
+def get_instructors():
+    admins = User.query.filter_by(role='admin').all()
+    instructors = User.query.filter_by(role='instructor').all()
+    returners = admins + instructors
+    json_returners = [instructor.serialize() for instructor in returners]
+    return json_returners
+
 @app.route('/delete_course/<int:course_id>', methods=['POST'])
 @login_required
 @admin_required
