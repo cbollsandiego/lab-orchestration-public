@@ -1,6 +1,8 @@
 <template>
     <div> 
-        <alert :message="message"></alert>
+        <div v-if="message!=''">
+            <alert :message="message"></alert>
+        </div>
       <form>
         <div class="mb-3">
             <label for="loginEmail" class="form-label">Email:</label>
@@ -21,7 +23,7 @@
     export default {
         data() {
             return {
-                message:"",
+                message: "",
                 loginForm: {
                     email: '',
                     pass: ''
