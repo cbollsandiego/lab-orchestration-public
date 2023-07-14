@@ -236,6 +236,10 @@ def newCourse():
         return {'status': 'noprof'}
     if data.get('name').strip() == '':
         return {'status': 'noname'}
+    if data.get('semester').strip() == '':
+        return {'status': 'nosem'}
+    if int(data.get('section')) < 1:
+        return {'status': 'nosec'}
     newCourse = Course(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section'), course_instructor=instructor_search.id)
     db.session.add(newCourse)
     db.session.commit()

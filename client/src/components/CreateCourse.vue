@@ -34,7 +34,7 @@ export default {
         return {
             name: '',
             semester: '',
-            section: null,
+            section: 1,
             instructor: '',
             instructorOptions: [],
             alertMessage: "",
@@ -73,12 +73,20 @@ export default {
                         this.alertMessage = 'Course name required.'
                         this.alertSuccess = false
                     }
+                    else if (response.data.status === 'nosem') {
+                        this.alertMessage = 'Semester required.'
+                        this.alertSuccess = false
+                    }
+                    else if (response.data.status === 'nosec') {
+                        this.alertMessage = 'Invalid Section Number.'
+                        this.alertSuccess = false
+                    }
                     else {
                         this.alertMessage = 'Course successfully created.'
                         this.alertSuccess = true
                         this.name = ''
                         this.semester = ''
-                        this.section = null
+                        this.section = 1
                         this.instructor = ''
                     }
                 })
