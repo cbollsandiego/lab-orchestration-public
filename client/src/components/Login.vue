@@ -11,7 +11,7 @@
             <input type="text" class="form-control" id="loginPass" v-model="loginForm.pass" placeholder="Enter Password">
         </div>
         <div>
-            <button class="btn btn-primaty btn-sm" @click="handleLoginSubmit">Login</button>
+            <button type="button" class="btn btn-primaty btn-sm" @click="handleLoginSubmit">Login</button>
         </div>
       </form>
     </div>
@@ -46,7 +46,8 @@
                 const path = 'http://localhost:5001/login';
                 axios.post(path, payload)
                     .then((response) => {
-                        this.alerts.push('Logged in!')
+                        this.message = 'Logged in!'
+                        console.log(response.data)
                         localStorage.setItem('token', response.data.token)
                         console.log(response.data)
                     })

@@ -1,8 +1,10 @@
 <template>
-    <div class="container py-5">
-      <h2 class="text-center mb-4">Session {{ $route.params.sessionId }}</h2>
-      <div class="bg-light p-4">
-        <groups-set :socket="socketio"></groups-set>
+    <div class="full-page">
+      <div class="container py-5">
+        <h2 class="text-center mb-4">Session {{ $route.params.sessionId }}</h2>
+        <div class="bg-light p-4">
+          <groups-set :socket="socketio"></groups-set>
+        </div>
       </div>
     </div>
   </template>
@@ -27,12 +29,16 @@ export default {
 </script>
 
 <style>
-.container {
-  background-color: #f8f9fa12;
-  border-radius: 10px;
-}
-
 .bg-light {
   background-color: #ffffff;
+}
+
+.full-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f2f2f2;
+  padding: 20px;
 }
 </style>

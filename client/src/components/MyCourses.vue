@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+        <h1>My Courses</h1>
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
@@ -24,29 +25,30 @@
 </template>
 
 <script>
-    import axios from 'axios';
-    export default {
-        data() {
-            return {
-                courses: []
-            }
-        },
-        methods: { 
-            getCourses() {
-                const path = 'http://localhost:5001/course_list';
-                let accessToken = localStorage.getItem('token')
-                console.log(accessToken)
-                axios.get(path, {headers: {'Authorization': accessToken, }})
-                .then((res) => {
-                    this.courses=res.data;
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-            }
-        },
-        created() { 
-            this.getCourses();
+import axios from 'axios'
+
+export default {
+    data() {
+        return {
+            courses: []
         }
+    },
+    methods: {
+        getMyCourses() {
+            const path = 'http://localhost:5001/mycourses'
+            let accessToken = localStorage.getItem('token')
+            console.log('okay, yeah')
+            axios.get(path, {headers: {'Authorization': accessToken}})
+            .then((res) => {
+                this.courses = res.data
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        }
+    },
+    created() {
+        this.getMyCourses();
     }
+}
 </script>
