@@ -1,49 +1,54 @@
-<template>
-    <div class="container">
-        <p>Lab {{ $route.params.lab_num }}</p>
+<template >
+     <div class="full-page">
+   <div class=" container sticky-top lab-header my-3">
         <div class="container">
-            <div class="row">
-                <div class="col-1 border border-primary border-3 rounded-circle " v-for="index in progress"
-                    style="width:30px ; height: 30px; background-color: rgb(240, 170, 78);">
-                    1
+            <div class="row mb-2 ">
+                <h3 class=" col text-start" style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Lab {{
+                    $route.params.lab_num }}</h3>
+                <div class="col-1 border border-white  border-3 rounded-circle " v-for="index in progress"
+                    style="width:30px ; height: 30px; background-color: green;">
+
                 </div>
                 <div class="col-1 border border-primary border-3 rounded-circle "
                     v-for="index in total_questions - progress" style="width:30px ; height: 30px; background-color: white">
-                    1
+                    ☆
                 </div>
             </div>
         </div>
-        <input type="submit" value="Raise hand" @click="sendCommand('handup')" style="color:blue">
-        <input type="submit" value="Lower hand" @click="sendCommand('handdown')">
-        <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-3">
+        <input  class="btn btn-outline-info" type="submit" value="Raise hand ✋ " v-if="!handup" @click="sendCommand('handup'); hand_raised('hand_raised')">
+        <input  class="btn btn-outline-info" type="submit" value="Lower hand" v-if="handup" @click="sendCommand('handdown'); hand_raised('hand_lowered')">
+    </div>
+    <div class="container ">
+        <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-4">
             <form v-if="parseInt(question.order_num) <= progress + 1">
                 <label for="addAnswer" class="form-label">Question {{ question.order_num }}: {{ question.title }}</label>
-                <textarea class="form-control" :id="question.order_num"
-                    v-model="questionForm.answer[question.order_num]">
+                <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num]">
                     Enter answer here!
                 </textarea>
-                <button type="button" class="btn btn-warning btn-sm" @click="handleSubmit(question)">Submit</button>
-                <alert :message="message" v-if="(question.order_num)== click && showMessage" @click="showMessage=false" ></alert>
-                <div v-if="question.checkpoint">
-                    <h4>
-                        Check Point.
-                    </h4>
+                <button type="button" class="btn btn-outline-success btn-sm my-2"
+                    @click="handleSubmit(question)">Submit</button>
+                <alert :message="message" :isSuccess="alertSuccess" v-if="(question.order_num) == click && showMessage" @click="showMessage = false">
+                </alert>
+                <div style="font-family: Verdana, Geneva, Tahoma, sans-serif;color: rgb(255, 68, 51); margin-top: 7px;"
+                    v-if="question.checkpoint">
+                    <h5>
+                        Checkpoint 
+                    </h5>
+                
+                    <input class="" type="radio" value="Yes" @click="sendCommand('')" name="Si" id="yes"
+                        checked="checked">Yes <br>
+                    <input class="" type="radio" value="No" @click="sendCommand('')" name="Si" id="no"
+                        checked="checked">No<br>
 
-                    <input type="radio" value="Yes" @click="sendCommand('')" name="Si" id="yes" checked="checked">Yes "<br>
-
-                    <input type="radio" value="No" @click="sendCommand('')" name="Si" id="no" checked="checked">No<br>
 
 
 
-
-
+                    
                 </div>
             </form>
         </div>
     </div>
-
-
-
+    </div>
 </template>
 
 <script>
@@ -57,8 +62,10 @@ export default {
             progress: 0,
             total_questions: 0,
             socket: undefined,
-            messsage:'',
+            messsage: '',
+            alertSuccess: true,
             click: '',
+            handup: false,
             showMessage: false,
             questionForm: {
                 id: '',
@@ -69,7 +76,7 @@ export default {
     },
     components: {
         alert: Alert
-        
+
     },
 
 
@@ -99,6 +106,7 @@ export default {
                 .then(() => {
                     this.getQuestions();
                     this.message = 'Answer saved';
+                    this.alertSuccess= true;
                     this.showMessage = true;
                     this.click = payload.id
                 })
@@ -106,12 +114,15 @@ export default {
 
                     console.log(error);
                     this.getQuestions();
+                    this.alertSuccess= false;
+                    this.message='Error occurred when saving messsage'
                     this.showMessage = true;
                 });
         },
         handleSubmit(question) {
             if (question) {
                 this.questionForm.id = question.order_num
+
 
             };
             console.log(this.questionForm.answer);
@@ -125,8 +136,17 @@ export default {
         initForm() {
             this.questionForm.answer = {};
             this.questionForm.id = '';
-            // this.addAnswer='';
+
         },
+        hand_raised(button_clicked) {
+            if (button_clicked == "hand_raised") {
+                this.handup = true;
+            }
+            else {
+                this.handup = false;
+            }
+        }
+
 
     },
     created() {
@@ -134,23 +154,42 @@ export default {
         this.socket = io("127.0.0.1:5001");
         this.socket.emit("enter_room", this.$route.params.session);
     },
-    //updateForm (input, value ) {
-    // this.form[input]= value
 
-    //}
-
-    //  saving data after refresh
-    //localStorage
-    //sessionStorage
-    //v-model
-    //input.value = input.value.replace(); input.saveValue()
 }
-//};
-
-
-
 </script>
+<style scoped>
+  .create-course-button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
 
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lab-header{
+    background-color: #f2f2f2;
+  }
+  
+  .full-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+
+  .input-text-box {
+    padding: 10px;
+    width: 740px;
+  }
+</style>
 
 
 
