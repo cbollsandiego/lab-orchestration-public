@@ -2,6 +2,7 @@ from app import db, login
 from flask_login import UserMixin
 from sqlalchemy import event
 from hashlib import md5
+from werkzeug.security import generate_password_hash, check_password_hash
 
 user_course = db.Table('user_course',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -19,10 +20,28 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     courses = db.relationship('Course', secondary='user_course', backref='users')
 
     groups = db.relationship('Group', secondary='user_group', backref='users')
+
+    def __init__(self, name, email, role, password):
+        self.name = name
+        self.email = email
+        self.role = role
+        self.password = generate_password_hash(password, method='sha256')
+
+    @classmethod
+    def authenticate(cls, **kwargs):
+        email = kwargs.get('email')
+        password = kwargs.get('pass')
+        if not email or not password:
+            return None
+        user = cls.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            return None
+        return user
 
     def __repr__(self):
         return f"User(id={self.id}, name='{self.name}', email='{self.email}', role='{self.role}')"
@@ -84,9 +103,13 @@ class Group(db.Model):
     group_name = db.Column(db.String(100))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
+    hand_raised = db.Column(db.Boolean, default=False)
+    at_checkpoint = db.Column(db.Boolean, default=False)
+    progress = db.Column(db.Integer, default=0)
+    max_progress = db.Column(db.Integer)
 
     def __repr__(self):
-        return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id})"
+        return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id}, hand_raised={self.hand_raised}, at_checkpoint={self.at_checkpoint}, progress={self.progress})"
 
 @event.listens_for(Group, 'before_delete')
 def remove_users_from_group(mapper, connection, target):
@@ -96,9 +119,8 @@ class Labs(db.Model):
     __tablename__="labs"
     lab_id=db.Column(db.Integer, primary_key=True)
     title= db.Column(db.String, nullable=False , unique=True)
-    questions=db.Column(db.String)
-    answers=db.Column(db.String)
-    lab_num=db.Column(db.Integer,nullable=False , unique=True)
+    questions=db.Column(db.String, nullable=False)
+    num_questions = db.Column(db.Integer, nullable=False)
 
 class Student_lab (db.Model): 
    __tablename__= "student_answers"

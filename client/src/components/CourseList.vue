@@ -34,7 +34,9 @@
         methods: { 
             getCourses() {
                 const path = 'http://localhost:5001/course_list';
-                axios.get(path)
+                let accessToken = localStorage.getItem('token')
+                console.log(accessToken)
+                axios.get(path, {headers: {'test': 'test', 'Authorization': accessToken, }})
                 .then((res) => {
                     this.courses=res.data;
                 })

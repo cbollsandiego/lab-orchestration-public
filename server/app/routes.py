@@ -8,7 +8,50 @@ from app.helpers.process_csv import read_csv
 import json
 from collections import namedtuple
 from flask_socketio import emit, join_room
-from datetime import datetime
+from datetime import datetime, timedelta
+import jwt
+from functools import wraps
+
+def token_required(f):
+    @wraps(f)
+    def _verify(*args, **kwargs):
+        print(request.headers)
+        auth_headers = request.headers.get('Authorization', '').split()
+        print(auth_headers)
+
+        invalid_msg = {
+            'message': 'Invalid token. Registeration and / or authentication required',
+            'authenticated': False
+        }
+        expired_msg = {
+            'message': 'Expired token. Reauthentication required.',
+            'authenticated': False
+        }
+
+        if len(auth_headers) != 1:
+            return jsonify(invalid_msg), 401
+
+        try:
+            token = auth_headers[0]
+            print(token)
+            header_data = jwt.get_unverified_header(token)
+            print(header_data)
+            data = jwt.decode(token, app.config['SECRET_KEY'], [header_data['alg']])
+            user = User.query.filter_by(email=data['sub']).first()
+            print(user)
+            if not user:
+                raise RuntimeError('User not found')
+            return f(user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+        except (jwt.InvalidTokenError, Exception) as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+
+    return _verify
+
+
+
 
 @app.route('/')
 @login_required
@@ -20,43 +63,36 @@ def test(session_id):
     greeting = 'Rendering from Flask'
     return render_template('test.html', greeting=greeting, session_id=session_id)
 
-'''@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
     data = {}
-    if current_user.is_authenticated:
+    '''if current_user.is_authenticated:
         logout_url = url_for('logout')
         data['alerts'] = (f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.')
-        #return redirect(url_for('index'))
-    #form = LoginForm()
+        #return redirect(url_for('index'))'''
+    #form = LoginForm()*/
     if request.method == "POST":
         print("we got a post!")
         post_data = request.get_json()
-        user = User.query.filter_by(email=post_data.get("email")).first()
+        user = User.authenticate(**post_data)
+        print(user)
+        #user = User.query.filter_by(email=post_data.get("email")).first()
         if user is None:
             data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
+            return jsonify(data), 401
             #return redirect(url_for('login'))
         else:
-            login_user(user, remember=False)
+            token = jwt.encode({
+                'sub': user.email,
+                'iat': datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(minutes=120)},
+                app.config['SECRET_KEY']
+            )
+            print(token)
             data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
+            data['token'] = token
+            return jsonify(data)
         #return redirect(url_for('index'))
-    print(data)
-    return jsonify(data)'''
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        logout_url = url_for('logout')
-        flash(Markup(
-            f'Already logged in as {current_user.name}. Try <a href=“{logout_url}“>logout</a> to log out.'))
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user is None:
-            flash(f'{form.email.data} was not found in the database. Try again!')
-            return redirect(url_for('login'))
-        login_user(user, remember=False)
-        return redirect(url_for('index'))
-    return render_template('login.html', form=form)
 
 @app.route('/logout')
 def logout():
@@ -174,16 +210,13 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-#@login_required
-#@instructor_required
-def course_list():
+@token_required
+def course_list(current_user):
     courses = Course.query.all()
     json_users = [course.serialize() for course in courses]
     return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
-@login_required
-@instructor_required
 def create_course():
     form = CreateCourseForm()
     if form.validate_on_submit():
@@ -294,64 +327,96 @@ def lab_fetcher(session_id):
         students = User.query.join(user_group).filter(user_group.c.group_id == group.id).all()
         for student in students:
             student_names.append(student.name)
-        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id})
+        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
     #response = jsonify(dict)
     return dict
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
 def student_view(course_name,lab_num,group_num,semester,section_num):
-
+    
     #lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
     course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
     
     # the file is beung read through a string (change to read from file)
     f="""[
     {
-        "order_num": 0,
+        "order_num": 1,
         "title": "What are the names of all the files in the repository you just cloned?",
         "type": "Question",
         "checkpoint": false
     },
     {
-        "order_num": 1,
+        "order_num": 2,
         "title": "What symbols are used to indicate that the REPL is ready for you to enter a statement?",
         "type": "Question",
         "checkpoint": false
     },
     {
-        "order_num": 2,
+        "order_num": 3,
         "title": "Draw a square",
         "type": "Exercise",
         "checkpoint": false
     },
     {
-        "order_num": 3,
+        "order_num": 4,
         "title": "What code did you write? Copy and paste that code for the answer to this question. Include only the Python code, not the “>>>” that indicates that you are in the REPL.",
         "type": "Question",
         "checkpoint": true
     },
     {
-        "order_num": 4,
+        "order_num": 5,
         "title": "What is the third oldest line of code in your Python REPL history? If the arrow keys arent working for you, put “Arrow Keys Dont Work :(” for your answer.",
         "type": "Question",
         "checkpoint": false
     }
     ]"""
+
     raw_results = json.loads(f)
-    response_object = {"status":"success","questions": raw_results}
+    
+    response_object = {"status":"success",
+                       "questions": raw_results,
+                       "progress":0,
+                       "total_questions": (len(raw_results)), 
+                       "answers":{}}
     if request.method == 'POST':
         post_data = request.get_json()
         now = datetime.now()
-        print(post_data.get("id"))
-        print(post_data.get("answer"))
-        response_object["answers"]=post_data.get("answer")
-        student_lab=Student_lab( question_num= int(post_data.get("id")), group_name=group_num, submit_time=now,saved_answer=post_data.get("answer")[str(post_data.get("id"))],course_id=course)
+        
+        student_lab=Student_lab(
+            question_num= int(post_data.get("id")), 
+            group_name=group_num, 
+            submit_time=now,
+            saved_answer=post_data.get("answer")[str(post_data.get("id"))],
+            course_id=course)
+        
         db.session.add(student_lab) 
         db.session.commit()
-        response_object['message'] = 'Question saved!'
-        print( "commit succesfull")
+       
+        group = Group.query.get(group_num)
+        if int(post_data.get("id")) > int(group.progress):
+            group.progress = int(post_data.get("id"))
+            db.session.add(group)
+            db.session.commit()
+            session_id = group.session_id
+            socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
+    
+    progress=Group.query.get(group_num).progress
+    response_object['progress']=progress
 
-    return jsonify (response_object)
+    answers=Student_lab.query.filter_by (group_name=group_num, course_id=course).all()
+    for answer in answers:
+        if response_object['answers'].get(answer.question_num)==None:
+            response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
+        else:
+            if answer.submit_time > response_object["answers"][answer.question_num]["time"]:
+               response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
+    for i in range(1, len(raw_results)+1):
+        if response_object["answers"].get(i)==None:
+            response_object["answers"][i]= ""
+        else:
+            response_object["answers"][i]=response_object["answers"][i]["answer"]
+    print(response_object["answers"])
+    return jsonify(response_object)
 
 
 
@@ -363,7 +428,18 @@ def connect_test():
 
 @socketio.on('command_send')
 def send_command(group_id, command):
-    session_id = Group.query.get(group_id).session_id
+    group = Group.query.get(group_id)
+    session_id = group.session_id
+    if command == "handup":
+        group.hand_raised = True
+    elif command == "handdown":
+        group.hand_raised = False
+    elif command == "checkon":
+        group.at_checkpoint = True
+    elif command == "checkoff":
+        group.at_checkpoint = False
+    db.session.add(group)
+    db.session.commit()
     print(str(group_id))
     emit('command', (group_id, command), to=str(session_id))
 
@@ -380,3 +456,16 @@ def pingtest(group_id):
     session_id = Group.query.get(group_id).session_id
     return render_template('emit_test.html', group_id=group_id, session_id=session_id)
 
+@app.route('/newlab/submit', methods=['POST'])
+def newLab():
+    data = request.get_json()
+    l = Labs.query.filter_by(title=data.get('title'))
+    if l is None or data.get('title') is None or data.get('questions') is None:
+        return {'status': 'name exists'}
+    lab = Labs(title=data.get('title'), questions=json.dumps(data.get('questions')), num_questions=int(data.get('num_questions')))
+    try:
+        db.session.add(lab)
+        db.session.commit()
+    except: 
+        return {'status': 'failure'}
+    return {'status': 'success'}

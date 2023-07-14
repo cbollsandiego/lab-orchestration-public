@@ -1,19 +1,33 @@
 <template>
-    <div v-for="group in groups">
-        <group-info 
-            :name="group.name" 
-            :members="group.members" 
-            :groupId="group.group_id" 
-            :score="group.score"
-            :handRaised="group.handRaised"
-            :atCheckpoint="group.atCheckpoint"
-            :progress="group.progress">
-        </group-info>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col" v-for="group in groups" :key="group.group_id">
+              <div class="card h-100">
+                <div class="card-body">
+                  <GroupInfo
+                    :name="group.name"
+                    :members="group.members"
+                    :groupId="group.group_id"
+                    :score="group.score"
+                    :handRaised="group.handRaised"
+                    :atCheckpoint="group.atCheckpoint"
+                    :progress="group.progress"
+                    :maxProgress="group.maxProgress"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</template>
+  </template>
 
 <script>
 import GroupInfo from './GroupInfo.vue'
+import axios from 'axios'
 export default {
     name: 'GroupsSet',
     props: {
@@ -28,15 +42,19 @@ export default {
         }
     },
     async created() {
-        const response = await fetch("http://127.0.0.1:5000/labs/fetch/" + this.$route.params.sessionId);
-        const data = await response.json();
-        for(var i = 0; i < data.length; i++) {
-            data[i].score = 0;
-            data[i].handRaised = false;
-            data[i].atCheckpoint = false;
-            data[i].progress = 0;
-        }
-        this.groups = data
+        var data;
+        axios.get("http://127.0.0.1:5001/labs/fetch/" + this.$route.params.sessionId)
+            .then((res) => {
+                data = res.data;
+                for(var i = 0; i < data.length; i++) {
+                    data[i].score = 0;
+                }
+                this.groups = data
+                this.calcScores()
+            })
+            .catch((error) => {
+                console.log(error)
+            });
     },
     mounted() {
         this.socket.on('command', (groupId, command) => {
@@ -49,15 +67,44 @@ export default {
             };
             var value = 0;
             group.handRaised ? value+=2 : value += 0;
-            group.atCheckpoint ? value++ :  value += 0;
+            group.atCheckpoint ? value+=1 :  value += 0;
             group.score = value;
-            this.updateGroups();
+            this.sortGroups();
         });
     },
     methods: {
-        updateGroups() {
-            this.groups.sort((a, b) => b.score - a.score)
+        sortGroups() {
+            this.groups.sort((a, b) => b.score - a.score || a.progress - b.progress)
         },
+        calcScores() {
+          for(let group of this.groups) {
+            var value = 0;
+            group.handRaised ? value+=2 : value += 0;
+            group.atCheckpoint ? value+=1 :  value += 0;
+            group.score = value;
+          }
+          this.sortGroups();
+        }
     }
 }
 </script>
+
+<style scoped>
+.container {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+.card {
+  background-color: #f0f0f0;
+  margin-bottom: 10px;
+}
+
+.card-body {
+  padding: 10px;
+}
+
+.row-cols-1 > .col {
+  margin-bottom: 10px;
+}
+</style>
