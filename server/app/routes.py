@@ -8,7 +8,47 @@ from app.helpers.process_csv import read_csv
 import json
 from collections import namedtuple
 from flask_socketio import emit, join_room
-from datetime import datetime
+from datetime import datetime, timedelta
+import jwt
+from functools import wraps
+
+def token_required(f):
+    @wraps(f)
+    def _verify(*args, **kwargs):
+        print(request.headers)
+        auth_headers = request.headers.get('Authorization', '').split()
+        print(auth_headers)
+
+        invalid_msg = {
+            'message': 'Invalid token. Registeration and / or authentication required',
+            'authenticated': False
+        }
+        expired_msg = {
+            'message': 'Expired token. Reauthentication required.',
+            'authenticated': False
+        }
+
+        if len(auth_headers) != 1:
+            return jsonify(invalid_msg), 401
+
+        try:
+            token = auth_headers[0]
+            print(token)
+            header_data = jwt.get_unverified_header(token)
+            print(header_data)
+            data = jwt.decode(token, app.config['SECRET_KEY'], [header_data['alg']])
+            user = User.query.filter_by(email=data['sub']).first()
+            print(user)
+            if not user:
+                raise RuntimeError('User not found')
+            return f(user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+        except (jwt.InvalidTokenError, Exception) as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+
+    return _verify
 
 
 
@@ -23,22 +63,36 @@ def test(session_id):
     greeting = 'Rendering from Flask'
     return render_template('test.html', greeting=greeting, session_id=session_id)
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    if current_user.is_authenticated:
+    data = {}
+    '''if current_user.is_authenticated:
         logout_url = url_for('logout')
-        flash(Markup(
-            f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.'))
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        data['alerts'] = (f'Already logged in as {current_user.name}. Try <a href="{logout_url}">logout</a> to log out.')
+        #return redirect(url_for('index'))'''
+    #form = LoginForm()*/
+    if request.method == "POST":
+        print("we got a post!")
+        post_data = request.get_json()
+        user = User.authenticate(**post_data)
+        print(user)
+        #user = User.query.filter_by(email=post_data.get("email")).first()
         if user is None:
-            flash(f'{form.email.data} was not found in the database. Try again!')
-            return redirect(url_for('login'))
-        login_user(user, remember=False)
-        return redirect(url_for('index'))
-    return render_template('login.html', form=form)
+            data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
+            return jsonify(data), 401
+            #return redirect(url_for('login'))
+        else:
+            token = jwt.encode({
+                'sub': user.email,
+                'iat': datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(minutes=120)},
+                app.config['SECRET_KEY']
+            )
+            print(token)
+            data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
+            data['token'] = token
+            return jsonify(data)
+        #return redirect(url_for('index'))
 
 @app.route('/logout')
 def logout():
@@ -52,12 +106,11 @@ def user(user_id):
     form = EmptyForm() if current_user.role == 'admin' else None
     return render_template('user.html', user=user, form=form)
 
-@app.route('/user_list')
-@login_required
-@admin_required
+@app.route('/userlist')
 def user_list():
     users = User.query.all()
-    return render_template('user_list.html', users=users)
+    json_users = [user.serialize() for user in users]
+    return jsonify(json_users) 
 
 @app.route('/create_user', methods=['GET', 'POST'])
 @login_required
@@ -151,15 +204,13 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-@login_required
-@instructor_required
-def course_list():
+@token_required
+def course_list(current_user):
     courses = Course.query.all()
-    return render_template('course_list.html', courses=courses)
+    json_users = [course.serialize() for course in courses]
+    return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
-@login_required
-@instructor_required
 def create_course():
     form = CreateCourseForm()
     if form.validate_on_submit():
@@ -176,6 +227,34 @@ def create_course():
         flash('Course created!')
         return redirect(url_for('create_course'))
     return render_template('create_course.html', form=form)
+
+@app.route('/newcourse/submit', methods=['POST'])
+def newCourse():
+    data = request.get_json()
+    course_search = Course.query.filter_by(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section')).first()
+    if course_search is not None:
+        return {'status': 'exists'}
+    instructor_search = User.query.filter_by(name=data.get('instructor')).first()
+    if instructor_search is None:
+        return {'status': 'noprof'}
+    if data.get('name').strip() == '':
+        return {'status': 'noname'}
+    if data.get('semester').strip() == '':
+        return {'status': 'nosem'}
+    if int(data.get('section')) < 1:
+        return {'status': 'nosec'}
+    newCourse = Course(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section'), course_instructor=instructor_search.id)
+    db.session.add(newCourse)
+    db.session.commit()
+    return {'status': 'success'}
+
+@app.route('/newcourse/getinstructors')
+def get_instructors():
+    admins = User.query.filter_by(role='admin').all()
+    instructors = User.query.filter_by(role='instructor').all()
+    returners = admins + instructors
+    json_returners = [instructor.serialize() for instructor in returners]
+    return json_returners
 
 @app.route('/delete_course/<int:course_id>', methods=['POST'])
 @login_required
@@ -250,14 +329,14 @@ def delete_group(group_id):
         return redirect(url_for('course', course_id=group.course_id))
     return redirect(url_for('index'))
 
-@app.route('/my_courses')
-@login_required
-def my_courses():
-    user = current_user
-    courses_taught = Course.query.filter_by(course_instructor=user.id).order_by(Course.course_name
-                            ).all() if user.role == 'admin' or user.role == 'instructor' else None
-    courses_in = Course.query.join(user_course).filter(user_course.c.user_id == user.id).order_by(Course.course_name).all()
-    return render_template('my_courses.html', courses_taught=courses_taught, courses_in=courses_in, user=user)
+@app.route('/mycourses')
+@token_required
+def my_courses(current_user):
+    courses_taught = Course.query.filter_by(course_instructor=current_user.id).order_by(Course.course_name).all()
+    courses_in = Course.query.join(user_course).filter(user_course.c.user_id == current_user.id).order_by(Course.course_name).all()
+    courses = courses_taught + courses_in
+    json_courses = [course.serialize() for course in courses]
+    return json_courses
 
 @app.route('/labs/fetch/<int:session_id>')
 def lab_fetcher(session_id):
@@ -268,8 +347,7 @@ def lab_fetcher(session_id):
         students = User.query.join(user_group).filter(user_group.c.group_id == group.id).all()
         for student in students:
             student_names.append(student.name)
-        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id})
-    #response = jsonify(dict)
+        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
     return dict
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
@@ -371,15 +449,6 @@ def connect_test():
 def send_command(group_id, command):
     group = Group.query.get(group_id)
     session_id = group.session_id
-    '''match command: 
-        case "handup":
-            group.hand_raised = True
-        case "handdown":
-            group.hand_raised = False
-        case "checkon":
-            group.at_checkpoint = True
-        case "checkoff":
-            group.at_checkpoint = False'''
     if command == "handup":
         group.hand_raised = True
     elif command == "handdown":
@@ -406,3 +475,16 @@ def pingtest(group_id):
     session_id = Group.query.get(group_id).session_id
     return render_template('emit_test.html', group_id=group_id, session_id=session_id)
 
+@app.route('/newlab/submit', methods=['POST'])
+def newLab():
+    data = request.get_json()
+    l = Labs.query.filter_by(title=data.get('title'))
+    if l is None or data.get('title') is None or data.get('questions') is None:
+        return {'status': 'name exists'}
+    lab = Labs(title=data.get('title'), questions=json.dumps(data.get('questions')), num_questions=int(data.get('num_questions')))
+    try:
+        db.session.add(lab)
+        db.session.commit()
+    except: 
+        return {'status': 'failure'}
+    return {'status': 'success'}

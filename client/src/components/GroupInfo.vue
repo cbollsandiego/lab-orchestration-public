@@ -12,9 +12,14 @@
           <img src="../assets/check.png" alt="At Checkpoint" class="image" />
         </div>
       </div>
-      <p class="progress-text">
-        <b>{{ progress }}/{{ maxProgress }}</b>
-      </p>
+      <div class="progress" style="height: 30px;">
+        <div class="progress-bar bg-success" role="progressbar" :style="{width: progressPercent + '%'}" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="justify-content-center d-flex position-absolute w-100">
+            <p class="progress-text">
+              <b>{{ progress }}/{{ maxProgress }}</b>
+            </p>
+          </div>
+      </div>
     </div>
   </template>
   
@@ -30,6 +35,11 @@
       handRaised: { type: Boolean },
       atCheckpoint: { type: Boolean },
       progress: { type: Number }
+    },
+    computed: {
+      progressPercent() {
+        return (this.progress/this.maxProgress) * 100
+      }
     }
   }
   </script>

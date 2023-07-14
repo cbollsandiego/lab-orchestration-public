@@ -1,8 +1,8 @@
-"""Initial migration
+"""empty message
 
-Revision ID: a93c6a7ebf29
+Revision ID: 2268c853be7c
 Revises: 
-Create Date: 2023-07-05 11:00:00.932707
+Create Date: 2023-07-13 11:49:54.431360
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a93c6a7ebf29'
+revision = '2268c853be7c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,11 +21,9 @@ def upgrade():
     op.create_table('labs',
     sa.Column('lab_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
-    sa.Column('questions', sa.String(), nullable=True),
-    sa.Column('answers', sa.String(), nullable=True),
-    sa.Column('lab_num', sa.Integer(), nullable=False),
+    sa.Column('questions', sa.String(), nullable=False),
+    sa.Column('num_questions', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('lab_id'),
-    sa.UniqueConstraint('lab_num'),
     sa.UniqueConstraint('title')
     )
     op.create_table('user',
@@ -33,12 +31,15 @@ def upgrade():
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('role', sa.String(length=20), nullable=False),
+    sa.Column('password', sa.String(length=255), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
     op.create_table('course',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('course_name', sa.String(length=100), nullable=True),
+    sa.Column('course_name', sa.String(length=100), nullable=False),
+    sa.Column('semester', sa.String(), nullable=True),
+    sa.Column('section_num', sa.Integer(), nullable=True),
     sa.Column('course_instructor', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['course_instructor'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -73,6 +74,10 @@ def upgrade():
     sa.Column('group_name', sa.String(length=100), nullable=True),
     sa.Column('course_id', sa.Integer(), nullable=True),
     sa.Column('session_id', sa.Integer(), nullable=True),
+    sa.Column('hand_raised', sa.Boolean(), nullable=True),
+    sa.Column('at_checkpoint', sa.Boolean(), nullable=True),
+    sa.Column('progress', sa.Integer(), nullable=True),
+    sa.Column('max_progress', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
     sa.ForeignKeyConstraint(['session_id'], ['session.id'], ),
     sa.PrimaryKeyConstraint('id')

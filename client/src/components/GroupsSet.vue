@@ -14,6 +14,7 @@
                     :handRaised="group.handRaised"
                     :atCheckpoint="group.atCheckpoint"
                     :progress="group.progress"
+                    :maxProgress="group.maxProgress"
                   />
                 </div>
               </div>
@@ -47,16 +48,13 @@ export default {
                 data = res.data;
                 for(var i = 0; i < data.length; i++) {
                     data[i].score = 0;
-                    data[i].handRaised = false;
-                    data[i].atCheckpoint = false;
-                    data[i].progress = 0;
                 }
                 this.groups = data
+                this.calcScores()
             })
             .catch((error) => {
                 console.log(error)
             });
-        
     },
     mounted() {
         this.socket.on('command', (groupId, command) => {
@@ -71,13 +69,22 @@ export default {
             group.handRaised ? value+=2 : value += 0;
             group.atCheckpoint ? value+=1 :  value += 0;
             group.score = value;
-            this.updateGroups();
+            this.sortGroups();
         });
     },
     methods: {
-        updateGroups() {
-            this.groups.sort((a, b) => b.score - a.score)
+        sortGroups() {
+            this.groups.sort((a, b) => b.score - a.score || a.progress - b.progress)
         },
+        calcScores() {
+          for(let group of this.groups) {
+            var value = 0;
+            group.handRaised ? value+=2 : value += 0;
+            group.atCheckpoint ? value+=1 :  value += 0;
+            group.score = value;
+          }
+          this.sortGroups();
+        }
     }
 }
 </script>

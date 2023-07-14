@@ -2,6 +2,7 @@ from app import db, login
 from flask_login import UserMixin
 from sqlalchemy import event
 from hashlib import md5
+from werkzeug.security import generate_password_hash, check_password_hash
 
 user_course = db.Table('user_course',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -19,10 +20,28 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     courses = db.relationship('Course', secondary='user_course', backref='users')
 
     groups = db.relationship('Group', secondary='user_group', backref='users')
+
+    def __init__(self, name, email, role, password):
+        self.name = name
+        self.email = email
+        self.role = role
+        self.password = generate_password_hash(password, method='sha256')
+
+    @classmethod
+    def authenticate(cls, **kwargs):
+        email = kwargs.get('email')
+        password = kwargs.get('pass')
+        if not email or not password:
+            return None
+        user = cls.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            return None
+        return user
 
     def __repr__(self):
         return f"User(id={self.id}, name='{self.name}', email='{self.email}', role='{self.role}')"
@@ -30,6 +49,13 @@ class User(UserMixin, db.Model):
     def profile_photo(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(digest, size)
+    
+    def serialize(self):
+        return {"id": self.id,
+                "name": self.name,
+                "email": self.email,
+                "role": self.role,
+                }
 
 @event.listens_for(User, 'before_delete')
 def remove_courses_from_user(mapper, connection, target):
@@ -58,6 +84,15 @@ class Course(db.Model):
     def get_students(self):
         students = User.query.join(user_course, (user_course.c.user_id == User.id)
                             ).filter_by(user_course.c.course_id == self.id)
+        
+    def serialize(self):
+        instructor = User.query.filter_by(id=self.course_instructor).first()
+        return {"id": self.id,
+                "course_name": self.course_name,
+                "semester": self.semester,
+                "section_num": self.section_num,
+                "course_instructor": instructor.name
+                }
 
 
 @event.listens_for(Course, 'before_delete')
@@ -85,10 +120,8 @@ class Labs(db.Model):
     __tablename__="labs"
     lab_id=db.Column(db.Integer, primary_key=True)
     title= db.Column(db.String, nullable=False , unique=True)
-    questions=db.Column(db.String)
-    answers=db.Column(db.String)
-    lab_num=db.Column(db.Integer,nullable=False , unique=True)
-    num_questions = db.Column(db.Integer)
+    questions=db.Column(db.String, nullable=False)
+    num_questions = db.Column(db.Integer, nullable=False)
 
 class Student_lab (db.Model): 
    __tablename__= "student_answers"
