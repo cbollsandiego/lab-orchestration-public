@@ -1,5 +1,6 @@
-<template class="bg-secondary p-2 text-white bg-opacity-10" >
-    <div class=" container sticky-top bg-white my-3">
+<template >
+     <div class="full-page">
+   <div class=" container sticky-top lab-header my-3">
         <div class="container">
             <div class="row mb-2 ">
                 <h3 class=" col text-start" style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Lab {{
@@ -26,7 +27,7 @@
                 </textarea>
                 <button type="button" class="btn btn-outline-success btn-sm my-2"
                     @click="handleSubmit(question)">Submit</button>
-                <alert :message="message" v-if="(question.order_num) == click && showMessage" @click="showMessage = false">
+                <alert :message="message" :isSuccess="alertSuccess" v-if="(question.order_num) == click && showMessage" @click="showMessage = false">
                 </alert>
                 <div style="font-family: Verdana, Geneva, Tahoma, sans-serif;color: rgb(255, 68, 51); margin-top: 7px;"
                     v-if="question.checkpoint">
@@ -47,6 +48,7 @@
             </form>
         </div>
     </div>
+    </div>
 </template>
 
 <script>
@@ -61,6 +63,7 @@ export default {
             total_questions: 0,
             socket: undefined,
             messsage: '',
+            alertSuccess: true,
             click: '',
             handup: false,
             showMessage: false,
@@ -103,6 +106,7 @@ export default {
                 .then(() => {
                     this.getQuestions();
                     this.message = 'Answer saved';
+                    this.alertSuccess= true;
                     this.showMessage = true;
                     this.click = payload.id
                 })
@@ -110,6 +114,8 @@ export default {
 
                     console.log(error);
                     this.getQuestions();
+                    this.alertSuccess= false;
+                    this.message='Error occurred when saving messsage'
                     this.showMessage = true;
                 });
         },
@@ -151,6 +157,39 @@ export default {
 
 }
 </script>
+<style scoped>
+  .create-course-button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lab-header{
+    background-color: #f2f2f2;
+  }
+  
+  .full-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+
+  .input-text-box {
+    padding: 10px;
+    width: 740px;
+  }
+</style>
 
 
 
