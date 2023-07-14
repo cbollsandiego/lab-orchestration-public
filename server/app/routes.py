@@ -20,7 +20,7 @@ def test(session_id):
     greeting = 'Rendering from Flask'
     return render_template('test.html', greeting=greeting, session_id=session_id)
 
-@app.route('/login', methods=['GET', 'POST'])
+'''@app.route('/login', methods=['GET', 'POST'])
 def login():
     data = {}
     if current_user.is_authenticated:
@@ -40,19 +40,41 @@ def login():
             data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
         #return redirect(url_for('index'))
     print(data)
-    return jsonify(data)
+    return jsonify(data)'''
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        logout_url = url_for('logout')
+        flash(Markup(
+            f'Already logged in as {current_user.name}. Try <a href=“{logout_url}“>logout</a> to log out.'))
+        return redirect(url_for('index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is None:
+            flash(f'{form.email.data} was not found in the database. Try again!')
+            return redirect(url_for('login'))
+        login_user(user, remember=False)
+        return redirect(url_for('index'))
+    return render_template('login.html', form=form)
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/user/<int:user_id>')
-@login_required
+@app.route('/userlist/<int:user_id>',methods=['PUT','DELETE'])
 def user(user_id):
-    user = User.query.filter_by(id=user_id).first_or_404()
-    form = EmptyForm() if current_user.role == 'admin' else None
-    return render_template('user.html', user=user, form=form)
+    data={'status': 'success'}
+    if request.method == 'PUT':
+        user = User.query.filter_by(id=user_id).first_or_404()
+        form = EmptyForm() if current_user.role == 'admin' else None
+    if request.method == 'DELETE':
+        user = User.query.filter_by(id=user_id).first()
+        db.session.delete(user)
+        db.session.commit()
+        data['message'] = 'User deleted!'
+    return jsonify(data)
 
 @app.route('/userlist')
 def user_list():
@@ -253,13 +275,15 @@ def delete_group(group_id):
     return redirect(url_for('index'))
 
 @app.route('/my_courses')
-@login_required
 def my_courses():
     user = current_user
-    courses_taught = Course.query.filter_by(course_instructor=user.id).order_by(Course.course_name
-                            ).all() if user.role == 'admin' or user.role == 'instructor' else None
+    print(user)
+    courses_taught = Course.query.filter_by(course_instructor=user.id).order_by(Course.course_name).all() if user.role == 'admin' or user.role == 'instructor' else None
     courses_in = Course.query.join(user_course).filter(user_course.c.user_id == user.id).order_by(Course.course_name).all()
-    return render_template('my_courses.html', courses_taught=courses_taught, courses_in=courses_in, user=user)
+    json_courses_taught = [course.serialize() for course in courses_taught]
+    json_courses_in= [course.serialize() for course in courses_in]
+    courses={"courses_taught":json_courses_taught, "courses_in":json_courses_in}
+    return jsonify(courses) 
 
 @app.route('/labs/fetch/<int:session_id>')
 def lab_fetcher(session_id):
