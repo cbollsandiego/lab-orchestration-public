@@ -102,11 +102,14 @@ def logout():
 @app.route('/userlist/<int:user_id>',methods=['PUT','DELETE'])
 def user(user_id):
     data={'status': 'success'}
+    print("Reached server")
     if request.method == 'PUT':
         user = User.query.filter_by(id=user_id).first_or_404()
         form = EmptyForm() if current_user.role == 'admin' else None
     if request.method == 'DELETE':
+        print("Has delete method")
         user = User.query.filter_by(id=user_id).first()
+        print(user)
         db.session.delete(user)
         db.session.commit()
         data['message'] = 'User deleted!'
