@@ -225,6 +225,22 @@ def create_course():
         return redirect(url_for('create_course'))
     return render_template('create_course.html', form=form)
 
+@app.route('/newcourse/submit', methods=['POST'])
+def newCourse():
+    data = request.get_json()
+    course_search = Course.query.filter_by(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section')).first()
+    if course_search is not None:
+        return {'status': 'exists'}
+    instructor_search = User.query.filter_by(name=data.get('instructor')).first()
+    if instructor_search is None:
+        return {'status': 'noprof'}
+    if data.get('name').strip() == '':
+        return {'status': 'noname'}
+    newCourse = Course(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section'), course_instructor=instructor_search.id)
+    db.session.add(newCourse)
+    db.session.commit()
+    return {'status': 'success'}
+
 @app.route('/newcourse/getinstructors')
 def get_instructors():
     admins = User.query.filter_by(role='admin').all()

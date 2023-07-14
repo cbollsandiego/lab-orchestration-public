@@ -48,7 +48,8 @@ export default {
                 this.$router.push({name: 'Login'})
             }
         }
-    }
+    },
+    
 }
 </script>
 

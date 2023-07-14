@@ -1,19 +1,29 @@
 <template>
-    <h1>Create Lab</h1>
-    <alert v-if="alertMessage" :message="alertMessage" :isSuccess="alertSuccess"></alert>
-    <label>Name:</label>
-    <input type="text" v-model="name" class="form-control">
-    <label>Semester:</label>
-    <input type="text" v-model="semester" class="form-control">
-    <label>Section:</label>
-    <input type="number" v-model="section" class="form-control" min="1" max="99">
-    <label>Instructor name:</label>
-    <input type="text" v-model="instructor" class="form-control" list="instructorList">
-    <datalist id="instructorList">
-        <option v-for="instructor in instructorOptions" :value="instructor.name"></option>
-    </datalist>
-    <br>
-    <button @click="createCourse" class="create-course-button">Create Course</button>
+    <div class="full-page">
+        <h1>Create Course</h1>
+        <alert v-if="alertMessage" :message="alertMessage" :isSuccess="alertSuccess"></alert>
+        <div class="input-text-box">
+            <label>Name:</label>
+            <input type="text" v-model="name" class="form-control">
+        </div>
+        <div class="input-text-box">
+            <label>Semester:</label>
+            <input type="text" v-model="semester" class="form-control">
+        </div>
+        <div class="input-text-box">
+            <label>Section:</label>
+            <input type="number" v-model="section" class="form-control" min="1" max="99">
+        </div>
+        <div class="input-text-box">
+            <label>Instructor name:</label>
+            <input type="text" v-model="instructor" class="form-control" list="instructorList">
+            <datalist id="instructorList">
+                <option v-for="instructor in instructorOptions" :value="instructor.name"></option>
+            </datalist>
+        </div>
+        <br>
+        <button @click="createCourse" class="create-course-button">Create Course</button>
+    </div>
 </template>
 
 <script>
@@ -24,9 +34,11 @@ export default {
         return {
             name: '',
             semester: '',
-            section: 1,
+            section: null,
             instructor: '',
-            instructorOptions: []
+            instructorOptions: [],
+            alertMessage: "",
+            alertSuccess: false
         }
     },
     components: {
@@ -36,7 +48,6 @@ export default {
         const path = 'http://localhost:5001/newcourse/getinstructors'
         axios.get(path)
         .then((res) => {
-            console.log(res.data)
             this.instructorOptions = res.data;
         })
         .catch((error) => {
@@ -45,19 +56,66 @@ export default {
     },
     methods: {
         createCourse() {
+            console.log('yeah yeah awesome')
             const path = 'http://localhost:5001/newcourse/submit'
+            const newCourse = {'name': this.name, 'semester': this.semester, 'section': this.section, 'instructor': this.instructor}
+            axios.post(path, newCourse)
+                .then((response) => {
+                    if(response.data.status === 'exists') {
+                        this.alertMessage = 'Course already exists. Change name, semester, or section number'
+                        this.alertSuccess = false
+                    }
+                    else if(response.data.status === 'noprof') {
+                        this.alertMessage = 'Instructor not found in database.'
+                        this.alertSuccess = false
+                    }
+                    else if (response.data.status === 'noname') {
+                        this.alertMessage = 'Course name required.'
+                        this.alertSuccess = false
+                    }
+                    else {
+                        this.alertMessage = 'Course successfully created.'
+                        this.alertSuccess = true
+                        this.name = ''
+                        this.semester = ''
+                        this.section = null
+                        this.instructor = ''
+                    }
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
         }
     }
 }
 </script>
 
-<style>
-.create-course-button {
+<style scoped>
+  .create-course-button {
     background-color: #4caf50;
     color: #fff;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
     border-radius: 5px;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .full-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+
+  .input-text-box {
+    padding: 10px;
+    width: 740px;
   }
 </style>
