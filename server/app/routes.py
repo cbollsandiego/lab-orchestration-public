@@ -4,6 +4,7 @@ from app.models import User, Course, user_course, Group, user_group, Labs, Stude
 from app.forms import LoginForm, CreateUserForm, CreateStudentForm, EmptyForm, CreateCourseForm, AddStudentForm, AddStudentFileForm, AddToGroupForm, CreateGroupForm, RemoveFromCourseForm,StudentAnswer,StudentLab, NewSessionForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.helpers.permission_levels import admin_required, instructor_required
+from app.helpers.permission_levels import login_req
 from app.helpers.process_csv import read_csv
 import json
 from collections import namedtuple
@@ -11,47 +12,6 @@ from flask_socketio import emit, join_room
 from datetime import datetime, timedelta
 import jwt
 from functools import wraps
-
-def token_required(f):
-    @wraps(f)
-    def _verify(*args, **kwargs):
-        print(request.headers)
-        auth_headers = request.headers.get('Authorization', '').split()
-        print(auth_headers)
-
-        invalid_msg = {
-            'message': 'Invalid token. Registeration and / or authentication required',
-            'authenticated': False
-        }
-        expired_msg = {
-            'message': 'Expired token. Reauthentication required.',
-            'authenticated': False
-        }
-
-        if len(auth_headers) != 1:
-            return jsonify(invalid_msg), 401
-
-        try:
-            token = auth_headers[0]
-            print(token)
-            header_data = jwt.get_unverified_header(token)
-            print(header_data)
-            data = jwt.decode(token, app.config['SECRET_KEY'], [header_data['alg']])
-            user = User.query.filter_by(email=data['sub']).first()
-            print(user)
-            if not user:
-                raise RuntimeError('User not found')
-            return f(user, *args, **kwargs)
-        except jwt.ExpiredSignatureError:
-            return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
-        except (jwt.InvalidTokenError, Exception) as e:
-            print(e)
-            return jsonify(invalid_msg), 401
-
-    return _verify
-
-
-
 
 @app.route('/')
 @login_required
@@ -107,6 +67,7 @@ def user(user_id):
     return render_template('user.html', user=user, form=form)
 
 @app.route('/userlist')
+@login_req('admin')
 def user_list():
     users = User.query.all()
     json_users = [user.serialize() for user in users]
@@ -204,10 +165,12 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-@token_required
+@login_req('admin')
 def course_list(current_user):
+    print('alright')
     courses = Course.query.all()
     json_users = [course.serialize() for course in courses]
+    print(json_users)
     return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
@@ -330,7 +293,7 @@ def delete_group(group_id):
     return redirect(url_for('index'))
 
 @app.route('/mycourses')
-@token_required
+@login_req()
 def my_courses(current_user):
     courses_taught = Course.query.filter_by(course_instructor=current_user.id).order_by(Course.course_name).all()
     courses_in = Course.query.join(user_course).filter(user_course.c.user_id == current_user.id).order_by(Course.course_name).all()
