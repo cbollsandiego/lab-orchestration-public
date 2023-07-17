@@ -104,8 +104,15 @@ def user(user_id):
     data={'status': 'success'}
     print("Reached server")
     if request.method == 'PUT':
-        user = User.query.filter_by(id=user_id).first_or_404()
-        form = EmptyForm() if current_user.role == 'admin' else None
+        user = User.query.filter_by(id=user_id).first()
+        if user is not None:
+            post_data = request.get_json()
+            user.name = post_data["name"]
+            user.role = post_data["role"]
+            db.session.add(user)
+            db.session.commit()
+            data['message'] = 'User updated!'
+            response_object = {'status': 'success'}
     if request.method == 'DELETE':
         print("Has delete method")
         user = User.query.filter_by(id=user_id).first()
@@ -113,6 +120,7 @@ def user(user_id):
         db.session.delete(user)
         db.session.commit()
         data['message'] = 'User deleted!'
+        response_object = {'status': 'success'}
     return jsonify(data)
 
 @app.route('/userlist')
