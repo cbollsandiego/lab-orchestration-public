@@ -123,6 +123,12 @@ class Labs(db.Model):
     questions=db.Column(db.String, nullable=False)
     num_questions = db.Column(db.Integer, nullable=False)
 
+    def serialize(self):
+        return {
+            'id': self.lab_id,
+            'title': self.title
+        }
+
 class Student_lab (db.Model): 
    __tablename__= "student_answers"
    answer_id=db.Column(db.Integer, primary_key=True)
@@ -137,3 +143,11 @@ class Session(db.Model):
     lab_id = db.Column(db.Integer, db.ForeignKey('labs.lab_id'))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     name = db.Column(db.String)
+
+    def serialize(self):
+        lab = Labs.query.get(self.lab_id)
+        return {
+            'id': self.id,
+            'lab_name': lab.title,
+            'name': self.name
+        }

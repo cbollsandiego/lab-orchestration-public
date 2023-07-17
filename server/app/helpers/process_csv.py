@@ -22,7 +22,7 @@ def make_user(row):
     email = row[2] + '@sandiego.edu'
     user = User.query.filter_by(email=email).first()
     if user is None:
-        user = User(name=name, email=email, role='student')
+        user = User(name, email, 'student', 'password')
         db.session.add(user)
         db.session.commit()
     return user

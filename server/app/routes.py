@@ -68,7 +68,7 @@ def user(user_id):
 
 @app.route('/userlist')
 @login_req('admin')
-def user_list():
+def user_list(current_user):
     users = User.query.all()
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
@@ -105,9 +105,81 @@ def delete_user(user_id):
         flash(f'User {user.name} has been deleted!')
     return redirect(url_for('index'))
 
+@app.route('/getuserid')
+@login_req()
+def get_user_id(current_user):
+    return {'role': current_user.role}
+
+@app.route('/getcourse/instructor/<course_name>/<semester>/<int:section>')
+@login_req('instructor')
+def course_getter(current_user, course_name, semester, section):
+    course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section).first()
+    if course is None: 
+        return {'status': 'failure'}
+    if current_user.role == 'instructor' and current_user.id != course.instructor_id:
+        return {'status': 'failure'}
+    students = User.query.join(user_course).filter(user_course.c.course_id == course.id).order_by(User.name).all()
+    instructor = User.query.get(course.course_instructor)
+    json_users = [user.serialize() for user in students]
+    sessions = Session.query.filter_by(course_id=course.id)
+    json_sessions = [session.serialize() for session in sessions]
+    labs = Labs.query.all()
+    json_labs = [lab.serialize() for lab in labs]
+    return {'status': 'success', 'name': course.course_name, 'instructor': instructor.name, 
+            'members': json_users, 'sessions': json_sessions, 'labs': json_labs}
+
+@app.route('/removefromcourse/<course_name>/<semester>/<int:section>', methods=['POST'])
+@login_req('instructor')
+def remove_from_course(current_user, course_name, semester, section):
+    student_name = request.get_json().get('student_name')
+    course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section).first()
+    user = User.query.filter_by(name=student_name).first()
+    if user is None or course is None:
+        return {'status': 'failure'}
+    db.session.execute(user_course.delete().where(user_course.c.user_id == user.id, user_course.c.course_id == course.id))
+    db.session.commit()
+    return {'status': 'success'}
+
+@app.route('/addsession/<course_name>/<semester>/<int:section>', methods=['POST'])
+@login_req('instructor')
+def add_session_to_course(current_user, course_name, semester, section):
+    session_name = request.get_json().get('name')
+    lab_name = request.get_json().get('lab')
+    lab = Labs.query.filter_by(title=lab_name).first()
+    course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section).first()
+    if lab is None or course is None:
+        return {'status': 'failure'}
+    sessionExists = Session.query.filter_by(course_id=course.id, name=session_name).first()
+    if sessionExists is not None:
+        return {'status': 'failure'}
+    session = Session(lab_id=lab.lab_id, course_id=course.id, name = session_name)
+    db.session.add(session)
+    db.session.commit()
+    return {'status': 'success'}
+
+@app.route('/addfromfile/<course_name>/<semester>/<int:section>', methods=['POST'])
+@login_req('instructor')
+def add_from_file(current_user, course_name, semester, section):
+    return {'status': 'success'}
+
+@app.route('/addfromname/<course_name>/<semester>/<int:section>', methods=['POST'])
+@login_req('instructor')
+def add_from_name(current_user, course_name, semester, section):
+    new_student_name = request.get_json().get('student_name')
+    user = User.query.filter_by(name=new_student_name).first()
+    if user is None:
+        return {'status': 'failure'}
+    course = Course.query.filter_by(course_name=course_name).first()
+    if course is None: 
+        return {'status': 'failure'}
+    course.users.extend([user])
+    db.session.add(course)
+    db.session.commit()
+    return {'status': 'success'}
+
 @app.route('/course/<int:course_id>', methods=['GET', 'POST'])
-@login_required
 def course(course_id):
+    current_user = User.query.get(1)
     course = Course.query.filter_by(id=course_id).first_or_404()
     instructor = User.query.get(course.course_instructor)
     students = User.query.join(user_course).filter(user_course.c.course_id == course_id).order_by(User.name).all()
