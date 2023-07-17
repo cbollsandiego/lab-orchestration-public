@@ -453,13 +453,15 @@ def pingtest(group_id):
 @app.route('/newlab/submit', methods=['POST'])
 def newLab():
     data = request.get_json()
-    l = Labs.query.filter_by(title=data.get('title'))
-    if l is None or data.get('title') is None or data.get('questions') is None:
+    l = Labs.query.filter_by(title=data.get('title')).first()
+    if l is not None or data.get('title') is None or data.get('questions') is None:
+        print("name_exists")
         return {'status': 'name exists'}
     lab = Labs(title=data.get('title'), questions=json.dumps(data.get('questions')), num_questions=int(data.get('num_questions')))
     try:
         db.session.add(lab)
         db.session.commit()
-    except: 
+        
+    except Exception as e: 
         return {'status': 'failure'}
     return {'status': 'success'}
