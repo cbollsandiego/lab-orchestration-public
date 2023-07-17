@@ -102,6 +102,10 @@ export default {
       axios.post(path, newLab)
         .then((response) => {
           if(response.data.status === 'failure') {
+            this.alertMessage = "Failure creating lab. Something went wrong."
+            this.alertSuccess = false
+          }
+          else if ( response.data.status =="name exists"){
             this.alertMessage = "Failure creating lab. Make sure the lab name is unique and no questions are blank."
             this.alertSuccess = false
           }

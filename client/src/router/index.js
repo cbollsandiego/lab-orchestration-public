@@ -8,6 +8,7 @@ import CourseList from '../components/CourseList.vue'
 import MyCourses from '../components/MyCourses.vue'
 import CreateCourse from '../components/CreateCourse.vue'
 import Course from '../components/Course.vue'
+import CreateUser from '../components/CreateUser.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,7 +24,7 @@ const router = createRouter({
       component: Login
     },
     {
-      path: '/:course_name/:semester/:section/:lab_num/:group/:session',
+      path: '/:course_name/:semester/:section/:session/:group',
       name: 'Student_Lab',
       component: Student_Lab
     },
@@ -38,7 +39,7 @@ const router = createRouter({
       component: CreateLab
     },
     {
-      path:'/userlist',
+      path: '/userlist',
       name: 'User List',
       component: UserList
     },
@@ -56,6 +57,12 @@ const router = createRouter({
       path: '/course/:course_name/:semester/:section',
       name: 'Course',
       component: Course
+    },
+    {
+      path: '/createuser',
+      name: 'Course User',
+      component: CreateUser
+
     }
   ]
 })
