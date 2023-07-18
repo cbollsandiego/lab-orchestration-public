@@ -4,6 +4,7 @@ from app.models import User, Course, user_course, Group, user_group, Labs, Stude
 from app.forms import LoginForm, CreateUserForm, CreateStudentForm, EmptyForm, CreateCourseForm, AddStudentForm, AddStudentFileForm, AddToGroupForm, CreateGroupForm, RemoveFromCourseForm,StudentAnswer,StudentLab, NewSessionForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.helpers.permission_levels import admin_required, instructor_required
+from app.helpers.permission_levels import login_req
 from app.helpers.process_csv import read_csv
 import json
 from collections import namedtuple
@@ -11,47 +12,6 @@ from flask_socketio import emit, join_room
 from datetime import datetime, timedelta
 import jwt
 from functools import wraps
-
-def token_required(f):
-    @wraps(f)
-    def _verify(*args, **kwargs):
-        print(request.headers)
-        auth_headers = request.headers.get('Authorization', '').split()
-        print(auth_headers)
-
-        invalid_msg = {
-            'message': 'Invalid token. Registeration and / or authentication required',
-            'authenticated': False
-        }
-        expired_msg = {
-            'message': 'Expired token. Reauthentication required.',
-            'authenticated': False
-        }
-
-        if len(auth_headers) != 1:
-            return jsonify(invalid_msg), 401
-
-        try:
-            token = auth_headers[0]
-            print(token)
-            header_data = jwt.get_unverified_header(token)
-            print(header_data)
-            data = jwt.decode(token, app.config['SECRET_KEY'], [header_data['alg']])
-            user = User.query.filter_by(email=data['sub']).first()
-            print(user)
-            if not user:
-                raise RuntimeError('User not found')
-            return f(user, *args, **kwargs)
-        except jwt.ExpiredSignatureError:
-            return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
-        except (jwt.InvalidTokenError, Exception) as e:
-            print(e)
-            return jsonify(invalid_msg), 401
-
-    return _verify
-
-
-
 
 @app.route('/')
 @login_required
@@ -124,6 +84,7 @@ def user(user_id):
     return jsonify(data)
 
 @app.route('/userlist')
+@login_req('admin')
 def user_list():
     users = User.query.all()
     json_users = [user.serialize() for user in users]
@@ -221,10 +182,12 @@ def course(course_id):
                              students=students, add_student_form=add_student_form, add_file_form=add_file_form, sessions=sessions, session_add_form=session_add_form)
 
 @app.route('/course_list')
-@token_required
+@login_req('admin')
 def course_list(current_user):
+    print('alright')
     courses = Course.query.all()
     json_users = [course.serialize() for course in courses]
+    print(json_users)
     return jsonify(json_users)
 
 @app.route('/create_course', methods=['GET', 'POST'])
@@ -244,6 +207,34 @@ def create_course():
         flash('Course created!')
         return redirect(url_for('create_course'))
     return render_template('create_course.html', form=form)
+
+@app.route('/newcourse/submit', methods=['POST'])
+def newCourse():
+    data = request.get_json()
+    course_search = Course.query.filter_by(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section')).first()
+    if course_search is not None:
+        return {'status': 'exists'}
+    instructor_search = User.query.filter_by(name=data.get('instructor')).first()
+    if instructor_search is None:
+        return {'status': 'noprof'}
+    if data.get('name').strip() == '':
+        return {'status': 'noname'}
+    if data.get('semester').strip() == '':
+        return {'status': 'nosem'}
+    if int(data.get('section')) < 1:
+        return {'status': 'nosec'}
+    newCourse = Course(course_name=data.get('name'), semester=data.get('semester'), section_num=data.get('section'), course_instructor=instructor_search.id)
+    db.session.add(newCourse)
+    db.session.commit()
+    return {'status': 'success'}
+
+@app.route('/newcourse/getinstructors')
+def get_instructors():
+    admins = User.query.filter_by(role='admin').all()
+    instructors = User.query.filter_by(role='instructor').all()
+    returners = admins + instructors
+    json_returners = [instructor.serialize() for instructor in returners]
+    return json_returners
 
 @app.route('/delete_course/<int:course_id>', methods=['POST'])
 @login_required
@@ -318,16 +309,14 @@ def delete_group(group_id):
         return redirect(url_for('course', course_id=group.course_id))
     return redirect(url_for('index'))
 
-@app.route('/my_courses')
-def my_courses():
-    user = current_user
-    print(user)
-    courses_taught = Course.query.filter_by(course_instructor=user.id).order_by(Course.course_name).all() if user.role == 'admin' or user.role == 'instructor' else None
-    courses_in = Course.query.join(user_course).filter(user_course.c.user_id == user.id).order_by(Course.course_name).all()
-    json_courses_taught = [course.serialize() for course in courses_taught]
-    json_courses_in= [course.serialize() for course in courses_in]
-    courses={"courses_taught":json_courses_taught, "courses_in":json_courses_in}
-    return jsonify(courses) 
+@app.route('/mycourses')
+@login_req()
+def my_courses(current_user):
+    courses_taught = Course.query.filter_by(course_instructor=current_user.id).order_by(Course.course_name).all()
+    courses_in = Course.query.join(user_course).filter(user_course.c.user_id == current_user.id).order_by(Course.course_name).all()
+    courses = courses_taught + courses_in
+    json_courses = [course.serialize() for course in courses]
+    return json_courses
 
 @app.route('/labs/fetch/<int:session_id>')
 def lab_fetcher(session_id):
@@ -339,7 +328,6 @@ def lab_fetcher(session_id):
         for student in students:
             student_names.append(student.name)
         dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
-    #response = jsonify(dict)
     return dict
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])

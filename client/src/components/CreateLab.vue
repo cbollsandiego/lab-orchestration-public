@@ -1,5 +1,5 @@
 <template>
-  <div class="create-lab">
+  <div class="full-page">
     <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
     <div class="title-container">
       <h1 class="title">Create Lab</h1>
@@ -145,7 +145,7 @@ html, body {
   padding: 0;
 }
 
-.create-lab {
+.full-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;

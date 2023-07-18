@@ -47,6 +47,7 @@
                 axios.post(path, payload)
                     .then((response) => {
                         this.message = 'Logged in!'
+                        console.log(response.data)
                         localStorage.setItem('token', response.data.token)
                         console.log(response.data)
                     })
