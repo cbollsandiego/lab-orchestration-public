@@ -128,7 +128,7 @@ class Student_lab (db.Model):
    answer_id=db.Column(db.Integer, primary_key=True)
    question_num=db.Column(db.Integer)
    group_name=db.Column(db.String)
-   course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
+   session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
    submit_time =db.Column(db.TIMESTAMP)
    saved_answer=db.Column(db.String)
 
@@ -137,3 +137,10 @@ class Session(db.Model):
     lab_id = db.Column(db.Integer, db.ForeignKey('labs.lab_id'))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     name = db.Column(db.String)
+
+class CreateUser (UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(255), nullable=False)

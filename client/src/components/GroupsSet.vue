@@ -43,7 +43,7 @@ export default {
     },
     async created() {
         var data;
-        axios.get("http://127.0.0.1:5001/labs/fetch/" + this.$route.params.sessionId)
+        axios.get("http://127.0.0.1:5001/labs/fetch/" +this.$route.params.course_name+"/"+this.$route.params.semester+"/"+this.$route.params.section+ "/"+this.$route.params.session)
             .then((res) => {
                 data = res.data;
                 for(var i = 0; i < data.length; i++) {

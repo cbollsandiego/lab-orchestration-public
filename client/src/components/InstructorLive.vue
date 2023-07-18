@@ -1,7 +1,7 @@
 <template>
     <div class="full-page">
       <div class="container py-5">
-        <h2 class="text-center mb-4">Session {{ $route.params.sessionId }}</h2>
+        <h2 class="text-center mb-4">Session {{ $route.params.session}}</h2>
         <div class="bg-light p-4">
           <groups-set :socket="socketio"></groups-set>
         </div>
@@ -20,7 +20,7 @@ export default {
     },
     created() {
         this.socketio = io("127.0.0.1:5001");
-        this.socketio.emit('enter_room', this.$route.params.sessionId);
+        this.socketio.emit('enter_room', this.$route.params.session);
     },
     components: {
         GroupsSet

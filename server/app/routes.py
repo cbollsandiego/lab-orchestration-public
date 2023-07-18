@@ -61,34 +61,39 @@ def logout():
 
 @app.route('/user/<int:user_id>')
 @login_required
-def user(user_id):
+def user(user_id, user_name,user_email,user_role):
     user = User.query.filter_by(id=user_id).first_or_404()
     form = EmptyForm() if current_user.role == 'admin' else None
     return render_template('user.html', user=user, form=form)
 
 @app.route('/userlist')
 @login_req('admin')
-def user_list():
+def user_list(current_user):
     users = User.query.all()
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
 
-@app.route('/create_user', methods=['GET', 'POST'])
-@login_required
-@instructor_required
-def create_user():
-    form = CreateUserForm() if current_user.role == 'admin' else CreateStudentForm()
-    if form.validate_on_submit():
-        email_exists = User.query.filter_by(email=form.email.data).first()
-        if email_exists:
-            flash('Email already in use!')
-            return redirect(url_for('create_user'))
-        new_user = User(name=form.name.data, email=form.email.data, role=form.role.data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('User created!')
-        return redirect(url_for('create_user'))
-    return render_template('create_user.html', form=form)
+
+@app.route('/createuser', methods=["POST"])
+@login_req('admin')
+def createuser(current_user):
+    data= request.get_json()
+    email_exists = User.query.filter_by(email=data.get("email")).first()
+    if email_exists:
+        return{"status":"exists"}
+    if data.get("name").strip() == "":
+        return {"status":"noname"}
+    if data.get("password").strip() == "":
+        return {"status":"nopassword"}
+    if data.get("email").strip() == "":
+        return {"status":"noemail"}
+    if data.get("role").strip() == "":
+        return {"status":"norole"}
+    
+    new_user= User(data.get("name"),data.get("email"),data.get("role"), data.get("password"))
+    db.session.add(new_user)
+    db.session.commit()
+    return{"status":"successful"}
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
@@ -301,9 +306,10 @@ def my_courses(current_user):
     json_courses = [course.serialize() for course in courses]
     return json_courses
 
-@app.route('/labs/fetch/<int:session_id>')
-def lab_fetcher(session_id):
+@app.route('/labs/fetch/<course_name>/<semester>/<int:section_num>/<session>')
+def lab_fetcher(course_name,semester,section_num,session):
     dict = []
+    session_id=Session.query.filter_by(name=session).first().id
     groups = Group.query.filter_by(session_id=session_id)
     for group in groups:
         student_names = []
@@ -313,16 +319,31 @@ def lab_fetcher(session_id):
         dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
     return dict
 
-@app.route("/<course_name>/<semester>/<int:section_num>/<int:lab_num>/<int:group_num>",methods=['GET', 'POST'])
-def student_view(course_name,lab_num,group_num,semester,section_num):
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_num>",methods=['GET', 'POST'])
+def student_view(course_name,session_name,group_num,semester,section_num):
     
-    #lab=Labs.query.filter_by (lab_num=lab_num).first_or_404()
+   
     course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
-    
+    session=Session.query.filter_by(course_id=course,name= session_name).first_or_404()
+    lab_id=session.lab_id
+    session_id=session.id
+    lab=Labs.query.filter_by (lab_id=lab_id).first_or_404()
     # the file is beung read through a string (change to read from file)
-    f="""[
-    {
-        "order_num": 1,
+    f=lab.questions
+    
+    
+    
+   # ADD THINGSLIKE GROUP BACK INTODATABASE 
+    """[
+    { f= open("...,"r")
+    for .. in f
+    
+       
+        
+         
+          
+           
+             "order_num": 1,
         "title": "What are the names of all the files in the repository you just cloned?",
         "type": "Question",
         "checkpoint": false
@@ -352,6 +373,7 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
         "checkpoint": false
     }
     ]"""
+    
 
     raw_results = json.loads(f)
     
@@ -369,12 +391,12 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
             group_name=group_num, 
             submit_time=now,
             saved_answer=post_data.get("answer")[str(post_data.get("id"))],
-            course_id=course)
+            session_id=session_id)
         
         db.session.add(student_lab) 
         db.session.commit()
        
-        group = Group.query.get(group_num)
+        group = Group.query.filter_by(group_name=group_num,session_id=session_id).first()
         if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
             db.session.add(group)
@@ -382,10 +404,10 @@ def student_view(course_name,lab_num,group_num,semester,section_num):
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
     
-    progress=Group.query.get(group_num).progress
+    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first.progress
     response_object['progress']=progress
 
-    answers=Student_lab.query.filter_by (group_name=group_num, course_id=course).all()
+    answers=Student_lab.query.filter_by (group_name=group_num, session_id=session_id).all()
     for answer in answers:
         if response_object['answers'].get(answer.question_num)==None:
             response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
@@ -441,13 +463,15 @@ def pingtest(group_id):
 @app.route('/newlab/submit', methods=['POST'])
 def newLab():
     data = request.get_json()
-    l = Labs.query.filter_by(title=data.get('title'))
-    if l is None or data.get('title') is None or data.get('questions') is None:
+    l = Labs.query.filter_by(title=data.get('title')).first()
+    if l is not None or data.get('title') is None or data.get('questions') is None:
+        print("name_exists")
         return {'status': 'name exists'}
     lab = Labs(title=data.get('title'), questions=json.dumps(data.get('questions')), num_questions=int(data.get('num_questions')))
     try:
         db.session.add(lab)
         db.session.commit()
-    except: 
+        
+    except Exception as e: 
         return {'status': 'failure'}
     return {'status': 'success'}

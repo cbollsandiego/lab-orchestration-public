@@ -4,19 +4,19 @@
         <div class="container">
             <div class="row mb-2 ">
                 <h3 class=" col text-start" style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Lab {{
-                    $route.params.lab_num }}</h3>
+                    $route.params.session}}</h3>
                 <div class="col-1 border border-white  border-3 rounded-circle " v-for="index in progress"
                     style="width:30px ; height: 30px; background-color: green;">
 
                 </div>
-                <div class="col-1 border border-primary border-3 rounded-circle "
+                <div class="col-1 border border-li border-3 rounded-circle "
                     v-for="index in total_questions - progress" style="width:30px ; height: 30px; background-color: white">
-                    ☆
+                    
                 </div>
             </div>
         </div>
-        <input  class="btn btn-outline-info" type="submit" value="Raise hand ✋ " v-if="!handup" @click="sendCommand('handup'); hand_raised('hand_raised')">
-        <input  class="btn btn-outline-info" type="submit" value="Lower hand" v-if="handup" @click="sendCommand('handdown'); hand_raised('hand_lowered')">
+        <input  class="btn btn-info" type="submit" value="Raise hand ✋ " v-if="!handup" @click="sendCommand('handup'); hand_raised('hand_raised')">
+        <input  class="btn btn-info" type="submit" value="Lower hand" v-if="handup" @click="sendCommand('handdown'); hand_raised('hand_lowered')">
     </div>
     <div class="container ">
         <div v-for="(question, index) in questions" :key="index" :id="question.order_num" class="mb-4">
@@ -25,7 +25,7 @@
                 <textarea class="form-control" :id="question.order_num" v-model="questionForm.answer[question.order_num]">
                     Enter answer here!
                 </textarea>
-                <button type="button" class="btn btn-outline-success btn-sm my-2"
+                <button type="button" class="btn btn-success btn-sm my-2"
                     @click="handleSubmit(question)">Submit</button>
                 <alert :message="message" :isSuccess="alertSuccess" v-if="(question.order_num) == click && showMessage" @click="showMessage = false">
                 </alert>
@@ -82,7 +82,7 @@ export default {
 
     methods: {
         getQuestions() {
-            const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.lab_num}/${this.$route.params.group}`;
+            const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
             axios.get(path)
                 .then((res) => {
                     this.questions = res.data.questions;
@@ -101,7 +101,7 @@ export default {
 
         },
         addAnswer(payload) {
-            const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.lab_num}/${this.$route.params.group}`;
+            const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
             axios.post(path, payload)
                 .then(() => {
                     this.getQuestions();
