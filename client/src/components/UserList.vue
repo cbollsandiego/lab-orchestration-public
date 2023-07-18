@@ -20,10 +20,7 @@
                         </button>
                     </td>
                     <td>
-                        <button
-                            type="button"
-                            class="btn btn-warning btn-sm"
-                            @click="toggleEditUserModal(user)">
+                        <button type="button" class="btn btn-warning btn-sm" @click="toggleEditUserModal(user)">
                             Update
                         </button>
                     </td>
@@ -31,67 +28,53 @@
             </tbody>
         </table>
     </div>
-   <!-- edit modal-->
-   <div
-  ref="editUserModal"
-  class="modal fade"
-  :class="{ show: activeEditUserModal, 'd-block': activeEditUserModal }"
-  tabindex="-1"
-  role="dialog">
-  <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title">Update</h5>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-          @click="toggleEditUserModal">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="mb-3">
-            <label for="editUserRole" class="form-label">Role:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="editUserRole"
-              v-model="editUserForm.role"
-              placeholder="Enter role">
-          </div>
-          <div class="mb-3">
-            <label for="editUserName" class="form-label">Name:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="editUserName"
-              v-model="editUserForm.name"
-              placeholder="Enter name">
-          </div>
-          <div class="btn-group" role="group">
-            <button
-              type="button"
-              class="btn btn-primary btn-sm"
-              @click="handleEditSubmit">
-              Submit
-            </button>
-            <button
-              type="button"
-              class="btn btn-danger btn-sm"
-              @click="handleEditCancel">
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+    <!-- edit modal-->
+    <div ref="editUserModal" class="modal fade" :class="{ show: activeEditUserModal, 'd-block': activeEditUserModal }"
+        tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                        @click="toggleEditUserModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="editUserRole" class="form-label">Role:</label>
+                            <select class="form-control" id="editUserRole" v-model="editUserForm.role">
+                                <option value="admin">
+                                    Admin
+                                </option>
+                                <option value="instructor">
+                                    Instructor
+                                </option>
+                                <option value="student">
+                                    Student
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Name:</label>
+                            <input type="text" class="form-control" id="editUserName" v-model="editUserForm.name"
+                                placeholder="Enter name">
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary btn-sm" @click="handleEditSubmit">
+                                Submit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" @click="handleEditCancel">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
- </div>
-<div v-if="activeEditUserModal" class="modal-backdrop fade show"></div>
-
+    <div v-if="activeEditUserModal" class="modal-backdrop fade show"></div>
 </template>
 
 <script>
@@ -104,9 +87,9 @@ export default {
             showMessage: false,
             message: '',
             activeEditUserModal: false,
-            editUserForm: { 
+            editUserForm: {
                 name: '',
-                role: '', 
+                role: '',
                 id: '',
             },
         }
@@ -152,7 +135,7 @@ export default {
             this.activeEditUserModal = !this.activeEditUserModal;
             if (this.activeEditUserModal) {
                 body.classList.add('modal-open');
-            } else{
+            } else {
                 body.classList.remove('modal-open');
             }
         },
@@ -181,8 +164,8 @@ export default {
         },
         handleEditCancel() {
             this.toggleEditUserModal(null);
-            this.initForm(); 
-            this.getUsers(); 
+            this.initForm();
+            this.getUsers();
         },
         initForm() {
             this.addUserForm.role = '';
