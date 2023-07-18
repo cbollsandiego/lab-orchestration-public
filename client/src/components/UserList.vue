@@ -1,6 +1,7 @@
 <template>
+    <div class="full-page">
     <div class="container">
-        <alert :message="message" v-if="showMessage"></alert>
+        <alert :message="message" :isSuccess="alertSuccess" v-if="showMessage"></alert>
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
@@ -27,6 +28,7 @@
                 </tr>
             </tbody>
         </table>
+    </div>
     </div>
     <!-- edit modal-->
     <div ref="editUserModal" class="modal fade" :class="{ show: activeEditUserModal, 'd-block': activeEditUserModal }"
@@ -87,6 +89,7 @@ export default {
             showMessage: false,
             message: '',
             activeEditUserModal: false,
+            alertSuccess: false,
             editUserForm: {
                 name: '',
                 role: '',
@@ -100,7 +103,8 @@ export default {
     methods: {
         getUsers() {
             const path = 'http://localhost:5001/userlist';
-            axios.get(path)
+            let accessToken = localStorage.getItem('token')
+            axios.get(path, {headers:{'Authorization': accessToken}})
                 .then((res) => {
                     this.users = res.data;
                 })
@@ -118,6 +122,7 @@ export default {
                     this.getUsers();
                     this.message = 'User deleted!';
                     this.showMessage = true;
+                    this.alertSuccess = true;
                 })
                 .catch((error) => {
                     console.error(error);
@@ -156,6 +161,7 @@ export default {
                     this.getUsers();
                     this.message = 'User updated!';
                     this.showMessage = true;
+                    this.alertSuccess = true;
                 })
                 .catch((error) => {
                     console.error(error);
@@ -179,3 +185,156 @@ export default {
     }
 }
 </script>
+
+<style>
+
+.form-switch .form-check-input {
+  height: 20px;
+  width: 48px;
+}
+.form-switch .form-check-input:focus {
+  border-color: rgba(0, 0, 0, 0.25);
+  outline: 0;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
+}
+.form-switch .form-check-input:checked {
+  background-color: #4caf50;
+  border-color: #4caf50;
+  border: none;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.full-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+.title-container {
+  width: 800px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  width: 800px;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.question-label {
+  flex-basis: 70px;
+  font-weight: bold;
+  margin-right: -12px;
+}
+
+.question {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.question-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 800px;
+}
+
+.question-content {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.question-order {
+  flex-basis: 50px;
+  font-weight: bold;
+  font-size: 20px;
+  margin-top: 34px;
+}
+
+.question-textarea-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.question-input {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  height: 100px;
+  resize: vertical;
+  width: 100%;
+}
+
+.title-input {
+  height: 32px;
+  line-height: 32px;
+}
+
+.delete-question-wrapper {
+  position: absolute;
+  right: 0;
+  bottom: -10px;
+}
+
+.delete-question {
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.add-question,
+.create-lab-button {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.add-question {
+  margin-bottom: 10px;
+}
+
+.create-lab-button {
+  margin-bottom: auto;
+  margin-top: 5px;
+}
+
+.question-order {
+  flex-basis: 50px;
+  font-weight: bold;
+  font-size: 20px;
+  margin-top: 34px;
+  margin-right: -40px;
+}
+
+.btn-group-vertical {
+  margin-top: 10px;
+}
+</style>

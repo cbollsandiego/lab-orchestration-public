@@ -85,7 +85,7 @@ def user(user_id):
 
 @app.route('/userlist')
 @login_req('admin')
-def user_list():
+def user_list(current_user):
     users = User.query.all()
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
