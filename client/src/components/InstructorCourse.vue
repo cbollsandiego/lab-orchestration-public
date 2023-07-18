@@ -1,42 +1,66 @@
 <template>
     <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
     <h1>{{this.name}}</h1>
-    <h2>{{this.instructor}}</h2>
-    <h3>Sessions</h3>
-    <ul class="list-group list-group-flush all">
+    <h3>{{this.instructor}}</h3>
+    <h4>Lab Sessions</h4>
+    <ul>
         <router-link v-for="session in sessions" :to="{name: 'Live Session', params: {sessionId: session.id}}" class="route-link">
-            <li class="list-group-item">{{session.name}} {{session.lab_name}}</li>
+            <li>{{session.name}} - {{session.lab_name}}</li>
         </router-link>
     </ul>
-    <div class="input-text-box">
-        <label>Add lab session:</label>
-        <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
+    <div class="add-session-wrapper">
+        <div class="input-text-box">
+            <label>Add lab session:</label>
+            <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
+        </div>
+        <select v-model="newSessionLab">
+            <option disabled value="">Choose Lab Template</option>
+            <option v-for="lab in labs">{{lab.title}}</option>
+        </select>
+        <button @click="addSession" class="create-session">Create Session</button>
     </div>
-    <select v-model="newSessionLab">
-        <option disabled value="">Choose Lab</option>
-        <option v-for="lab in labs">{{lab.title}}</option>
-    </select>
-    <button @click="addSession" class="create-session">Create Session</button>
     <br>
-    <h3>Members</h3>
-    <div class="custom-file">
-        <h5>Add Students From File:</h5>
-        <input type="file" class="custom-file-input" id="customFile" @change="addFromFile($event)">
-    </div>
-    <div class="input-text-box">
-        <label>Add student by name:</label>
-        <input type="text" v-model="newMemberName" class="form-control" placeholder="New Student Name">
-    </div>
-    <button @click="addFromName" class="add-from-name">Add Student</button>
     <br>
-    <ul class="student-list">
-        <li v-for="member in members" class="list-group-item">{{member.name}}</li>
-    </ul>
-    <select v-model="memberToRemove">
-        <option disabled value="">Select student to remove</option>
-        <option v-for="member in members">{{member.name}}</option>
-    </select>
-    <button @click="removeStudent(memberToRemove)" class="remove-student">Remove</button>
+    <h4>Members</h4>
+    <div class="add-remove-wrapper">
+        <div class="add-remove-element">
+            <div class="custom-file">
+                <label>Add Students From .csv File:</label>
+                <input type="file" class="custom-file-input" id="customFile" @change="addFromFile($event)">
+            </div>
+            <br>
+            <div class="input-text-box">
+                <label>Add student by name:</label>
+                <input type="text" v-model="newMemberName" class="form-control" placeholder="New Student Name">
+            </div>
+            <button @click="addFromName" class="add-from-name">Add Student</button>
+        </div>
+        <div class="add-remove-element remove-border">
+            <label>Remove student:</label>
+            <select v-model="memberToRemove" class="form-select">
+                <option disabled value="">Select student to remove</option>
+                <option v-for="member in members">{{member.name}}</option>
+            </select>
+            <button @click="removeStudent(memberToRemove)" class="remove-student">Remove Student</button>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <h5>Member List</h5>
+        <table class="table table-striped table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="member in members">
+                    <td>{{ member.name }}</td>
+                    <td>{{ member.email }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script>
@@ -206,9 +230,9 @@ export default {
     background-color: #ff0000;
     color: #fff;
     border: none;
-    padding: 5px 8px;
+    padding: 10px 20px;
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 5px;
 }
 
 .add-from-name,
@@ -222,10 +246,36 @@ export default {
 }
 
 .all {
-    width: 800px;
+    width: 600px;
   }
 
-.student-list {
-    width: 400px;
+.add-remove-wrapper {
+    display: flex;
+    width: 100%
+}
+
+.add-remove-element {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.remove-border {
+    border: 2px solid #ff0000;
+    padding: 52px 20px;
+}
+
+.table-wrapper {
+    padding: 8px 10px;
+    border: 2px solid black;
+    border-radius: 20px;
+}
+
+.add-session-wrapper {
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    padding: 10px
 }
 </style>

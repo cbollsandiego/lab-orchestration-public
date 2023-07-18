@@ -97,7 +97,7 @@ export default {
       this.questions.sort((a, b) => a.order_num - b.order_num)
     },
     submitNewLab() {
-      const newLab = { title: this.title, questions: this.questions, num_questions: this.questions.length };
+      const newLab = { title: this.title.trim(), questions: this.questions, num_questions: this.questions.length };
       const path = 'http://localhost:5001/newlab/submit'
       axios.post(path, newLab)
         .then((response) => {
