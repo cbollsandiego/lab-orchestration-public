@@ -9,7 +9,7 @@
         </router-link>
     </ul>
     <div class="input-text-box">
-        <label>Add session:</label>
+        <label>Add lab session:</label>
         <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
     </div>
     <select v-model="newSessionLab">
@@ -29,7 +29,7 @@
     </div>
     <button @click="addFromName" class="add-from-name">Add Student</button>
     <br>
-    <ul class="list-group list-group-flush">
+    <ul class="student-list">
         <li v-for="member in members" class="list-group-item">{{member.name}}</li>
     </ul>
     <select v-model="memberToRemove">
@@ -81,7 +81,6 @@ export default {
                         this.sessions = res.data.sessions
                         this.labs = res.data.labs
                     }
-                    
                 })
                 .catch((error) => {
                     console.log(error)
@@ -150,9 +149,11 @@ export default {
                 this.alertSuccess = false
                 return;
             }
+            var formData = new FormData();
+            formData.append("csv", file)
             const path = `http://localhost:5001/addfromfile/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}`
             const accessToken = localStorage.getItem('token')
-            await axios.post(path, {'file': file}, {headers: {'Authorization': accessToken}})
+            await axios.post(path, formData, {headers: {'Authorization': accessToken, 'Content-Type': 'multipart/form-data'}})
                 .then((res) => {
                     if(res.data.status === 'success') {
                         this.alertMessage = 'Added all students from file'
@@ -166,6 +167,8 @@ export default {
                 .catch((error) => {
                     console.log(error)
                 })
+            this.getInfo()
+
         },
         async addFromName() {
             if(!this.newMemberName){
@@ -221,4 +224,8 @@ export default {
 .all {
     width: 800px;
   }
+
+.student-list {
+    width: 400px;
+}
 </style>

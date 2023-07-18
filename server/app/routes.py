@@ -158,6 +158,16 @@ def add_session_to_course(current_user, course_name, semester, section):
 @app.route('/addfromfile/<course_name>/<semester>/<int:section>', methods=['POST'])
 @login_req('instructor')
 def add_from_file(current_user, course_name, semester, section):
+    course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section).first()
+    f = request.files['csv']
+    try: 
+        users = read_csv(f)
+        course.users.extend(users)
+        db.session.add(course)
+        db.session.commit()
+    except Exception as e: 
+        print(e)
+        return {'status': 'failure'}
     return {'status': 'success'}
 
 @app.route('/addfromname/<course_name>/<semester>/<int:section>', methods=['POST'])
