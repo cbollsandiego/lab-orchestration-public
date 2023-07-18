@@ -108,7 +108,7 @@ class Group(db.Model):
     at_checkpoint = db.Column(db.Boolean, default=False)
     progress = db.Column(db.Integer, default=0)
     max_progress = db.Column(db.Integer)
-
+ 
     def __repr__(self):
         return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id}, hand_raised={self.hand_raised}, at_checkpoint={self.at_checkpoint}, progress={self.progress})"
 
@@ -137,6 +137,14 @@ class Session(db.Model):
     lab_id = db.Column(db.Integer, db.ForeignKey('labs.lab_id'))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     name = db.Column(db.String)
+
+    def serialize(self):
+        lab = Labs.query.get(self.lab_id)
+        return {
+            'id': self.id,
+            'lab_name': lab.title,
+            'name': self.name
+        }
 
 class CreateUser (UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

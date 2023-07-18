@@ -240,7 +240,6 @@ def delete_course(course_id):
     return redirect(url_for('index'))
 
 @app.route('/course/<int:course_id>/<int:session_id>', methods=['GET', 'POST'])
-@login_required
 def session(course_id, session_id):
     course = Course.query.get_or_404(course_id)
     session = Session.query.get_or_404(session_id)
@@ -248,9 +247,8 @@ def session(course_id, session_id):
     users = User.query.join(user_course).filter(user_course.c.course_id == course_id).order_by(User.name).all()
     user_choices = [(str(user.id), user.name) for user in users]
     group_choices = [(str(group.id), group.group_name) for group in groups]
-    add_to_group_form = AddToGroupForm(possible_students=user_choices, groups=group_choices
-                        ) if current_user.role == 'admin' or current_user.id == course.course_instructor else None
-    new_group_form = CreateGroupForm() if current_user.role == 'admin' or current_user.id == course.course_instructor else None
+    add_to_group_form = AddToGroupForm(possible_students=user_choices, groups=group_choices)
+    new_group_form = CreateGroupForm()
 
     if add_to_group_form and add_to_group_form.validate_on_submit() and add_to_group_form.submit_add_to_group.data:
         group_add = Group.query.get_or_404(add_to_group_form.group.data)
@@ -446,6 +444,25 @@ def send_command(group_id, command):
     db.session.commit()
     print(str(group_id))
     emit('command', (group_id, command), to=str(session_id))
+
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups",methods=['GET'])
+def get_groups(course_name, semester,section_num,session_name):
+    course_id=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
+    session=Session.query.filter_by(course_id=course_id,name=session_name).first_or_404()
+    groups=Group.query.filter_by(session_id=session.id).all()
+    dict=[]
+    for group in groups:
+        student_names=[]
+        students=User.query.join(user_group).filter(user_group.c.group_id==group.id).all()
+        for student in students:
+            student_names.append(student.name)
+        dict.append({"name":group.group_name,"members":student_names})
+    sessions=Session.query.filter(Session.course_id== course_id, Session.name!= session.name).all()
+    json_sessions=[s.serialize() for s in sessions]
+    return {"groups":dict, "old_sessions":json_sessions}
+
+
+
 
 @socketio.on('ping')
 def get_ping():

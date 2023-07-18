@@ -6,7 +6,7 @@
   {% endblock %}</title>
 </head>
 <body>
-  <ul class="navbar">
+  <!-- <ul class="navbar">
     <li><a href="{{ url_for('index') }}">Home</a></li>
     <li><a href="{{ url_for('user_list') }}">User List</a></li>
     <li><a href="{{ url_for('create_user') }}">Create User</a></li>
@@ -15,7 +15,7 @@
     <li><a href="{{ url_for('create_course') }}">Create Course</a></li>
     <li><a href="{{ url_for('login') }}">Login</a></li>
     <li><a href="{{ url_for('logout') }}">Logout</a></li>
-  </ul>
+  </ul> -->
   {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for message in messages %}
