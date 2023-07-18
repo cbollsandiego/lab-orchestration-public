@@ -68,25 +68,32 @@ def user(user_id, user_name,user_email,user_role):
 
 @app.route('/userlist')
 @login_req('admin')
-def user_list():
+def user_list(current_user):
     users = User.query.all()
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
 
-@app.route('/create_user', methods=['GET', 'POST'])
-def create_user():
-    form = CreateUserForm()
-    if form.validate_on_submit():
-        email_exists = User.query.filter_by(email=form.email.data).first()
-        if email_exists:
-            flash('Email already in use!')
-            return redirect(url_for('create_user'))
-        new_user = User(name=form.name.data, email=form.email.data, role=form.role.data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('User created!')
-        return redirect(url_for('create_user'))
-    return render_template('create_user.html', form=form)
+
+@app.route('/createuser', methods=["POST"])
+@login_req('admin')
+def createuser(current_user):
+    data= request.get_json()
+    email_exists = User.query.filter_by(email=data.get("email")).first()
+    if email_exists:
+        return{"status":"exists"}
+    if data.get("name").strip() == "":
+        return {"status":"noname"}
+    if data.get("password").strip() == "":
+        return {"status":"nopassword"}
+    if data.get("email").strip() == "":
+        return {"status":"noemail"}
+    if data.get("role").strip() == "":
+        return {"status":"norole"}
+    
+    new_user= User(data.get("name"),data.get("email"),data.get("role"), data.get("password"))
+    db.session.add(new_user)
+    db.session.commit()
+    return{"status":"successful"}
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
@@ -397,7 +404,7 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
     
-    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first().progress
+    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first.progress
     response_object['progress']=progress
 
     answers=Student_lab.query.filter_by (group_name=group_num, session_id=session_id).all()
