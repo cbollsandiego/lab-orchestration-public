@@ -9,9 +9,9 @@
                     style="width:30px ; height: 30px; background-color: green;">
 
                 </div>
-                <div class="col-1 border border-primary border-3 rounded-circle "
+                <div class="col-1 border border-li border-3 rounded-circle "
                     v-for="index in total_questions - progress" style="width:30px ; height: 30px; background-color: white">
-                    ☆
+                    
                 </div>
             </div>
         </div>

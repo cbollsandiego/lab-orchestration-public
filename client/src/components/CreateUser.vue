@@ -7,8 +7,8 @@
             <input type="text" v-model="name" class="form-control">
         </div>
         <div class="input-text-box">
-            <label>Id:</label>
-            <input type="text" v-model="id" class="form-control">
+            <label>Password:</label>
+            <input type="text" v-model="password" class="form-control">
         </div>
         <div class="input-text-box">
             <label>Email:</label>
@@ -36,7 +36,7 @@ export default {
     data() {
         return {
             name: '',
-            id: '',
+            password: '',
             email: '',
             role: '',
             alertMessage: "",
@@ -50,7 +50,7 @@ export default {
         createUser() {
             console.log('yeah yeah awesome')
             const path = 'http://localhost:5001/createuser'
-            const newUser = { 'id': this.id, 'name': this.name, 'email': this.email, 'role': this.role }
+            const newUser = { 'password': this.password, 'name': this.name, 'email': this.email, 'role': this.role }
 
             axios.post(path, newUser)
                 .then((response) => {
@@ -62,8 +62,8 @@ export default {
                         this.alertMessage = 'Name not found in database.'
                         this.alertSuccess = false
                     }
-                    else if (response.data.status === 'noid') {
-                        this.alertMessage = 'ID required.'
+                    else if (response.data.status === 'nopassword') {
+                        this.alertMessage = 'Password required.'
                         this.alertSuccess = false
                     }
                     else if (response.data.status === 'nosem') {

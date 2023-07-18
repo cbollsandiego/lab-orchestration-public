@@ -13,7 +13,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/livesession/:sessionId',
+      path: '/:course_name/:semester/:section/:session/livesession',
       name: 'Live Session',
       component: InstructorLive
     },

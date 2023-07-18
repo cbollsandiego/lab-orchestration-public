@@ -299,9 +299,10 @@ def my_courses(current_user):
     json_courses = [course.serialize() for course in courses]
     return json_courses
 
-@app.route('/labs/fetch/<int:session_id>')
-def lab_fetcher(session_id):
+@app.route('/labs/fetch/<course_name>/<semester>/<int:section_num>/<session>')
+def lab_fetcher(course_name,semester,section_num,session):
     dict = []
+    session_id=Session.query.filter_by(name=session).first().id
     groups = Group.query.filter_by(session_id=session_id)
     for group in groups:
         student_names = []
@@ -311,19 +312,21 @@ def lab_fetcher(session_id):
         dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
     return dict
 
-@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<int:group_num>",methods=['GET', 'POST'])
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_num>",methods=['GET', 'POST'])
 def student_view(course_name,session_name,group_num,semester,section_num):
     
    
     course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
-    lab_id=Session.query.filter_by(course_id=course,name= session_name).first_or_404().lab_id
+    session=Session.query.filter_by(course_id=course,name= session_name).first_or_404()
+    lab_id=session.lab_id
+    session_id=session.id
     lab=Labs.query.filter_by (lab_id=lab_id).first_or_404()
     # the file is beung read through a string (change to read from file)
     f=lab.questions
     
     
     
-    
+   # ADD THINGSLIKE GROUP BACK INTODATABASE 
     """[
     { f= open("...,"r")
     for .. in f
@@ -381,12 +384,12 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             group_name=group_num, 
             submit_time=now,
             saved_answer=post_data.get("answer")[str(post_data.get("id"))],
-            course_id=course)
+            session_id=session_id)
         
         db.session.add(student_lab) 
         db.session.commit()
        
-        group = Group.query.get(group_num)
+        group = Group.query.filter_by(group_name=group_num,session_id=session_id).first()
         if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
             db.session.add(group)
@@ -394,10 +397,10 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
     
-    progress=Group.query.get(group_num).progress
+    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first().progress
     response_object['progress']=progress
 
-    answers=Student_lab.query.filter_by (group_name=group_num, course_id=course).all()
+    answers=Student_lab.query.filter_by (group_name=group_num, session_id=session_id).all()
     for answer in answers:
         if response_object['answers'].get(answer.question_num)==None:
             response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
