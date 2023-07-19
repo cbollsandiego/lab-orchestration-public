@@ -10,6 +10,7 @@ import CreateCourse from '../components/CreateCourse.vue'
 import Course from '../components/Course.vue'
 import CreateUser from '../components/CreateUser.vue'
 import Groups from '../components/Groups.vue'
+import NotFound from '../components/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,6 +71,12 @@ const router = createRouter({
       name: 'Create Groups',
       component: Groups
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'Not Found',
+      component: NotFound
+    //  component: ()=> import('@components/NotFound.vue') 
+    }
   ]
 })
 

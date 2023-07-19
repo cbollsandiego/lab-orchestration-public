@@ -410,20 +410,12 @@ def student_view(course_name,session_name,group_num,semester,section_num):
     lab=Labs.query.filter_by (lab_id=lab_id).first_or_404()
     # the file is beung read through a string (change to read from file)
     f=lab.questions
-    
-    
-    
-   # ADD THINGSLIKE GROUP BACK INTODATABASE 
     """[
-    { f= open("...,"r")
-    for .. in f
+   
     
        
         
-         
-          
-           
-             "order_num": 1,
+ "order_num": 1,
         "title": "What are the names of all the files in the repository you just cloned?",
         "type": "Question",
         "checkpoint": false
