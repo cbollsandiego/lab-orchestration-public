@@ -112,6 +112,7 @@ export default {
                 })
                 .catch((error) => {
                     console.log(error)
+                    this.$router.push({ name: 'Login'})
                 })
             window.scrollTo(0,0)
         },
