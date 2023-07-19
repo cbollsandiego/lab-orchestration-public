@@ -402,7 +402,7 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
     
-    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first.progress
+    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first().progress
     response_object['progress']=progress
 
     answers=Student_lab.query.filter_by (group_name=group_num, session_id=session_id).all()

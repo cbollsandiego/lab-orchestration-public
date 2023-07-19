@@ -4,6 +4,7 @@
             <thead>
                 <tr>
                     <th>Id</th>
+                    
                     <th>Course Name</th>
                     <th>Semester</th>
                     <th>Section</th>
