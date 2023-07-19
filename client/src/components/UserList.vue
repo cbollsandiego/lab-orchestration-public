@@ -2,11 +2,13 @@
     <div class="container">
         <table class="table table-striped table-bordered">
             <thead>
-                <button> 
+                
           <router-link :to="{ name: 'Create User' }" class="route-link">
+            <button>
             <a class="nav-link">Create User</a>
+          </button>
             </router-link>
-            </button>
+            
                 <tr>
                     <th>Name</th>
                     <th>Email</th>

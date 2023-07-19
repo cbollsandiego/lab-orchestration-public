@@ -55,7 +55,7 @@ const router = createRouter({
     },
     {
       path: '/createuser',
-      name: 'Course User',
+      name: 'Create User',
       component: CreateUser
 
     },
