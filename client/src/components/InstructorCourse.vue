@@ -4,8 +4,12 @@
     <h3>{{this.instructor}}</h3>
     <h4>Lab Sessions</h4>
     <ul>
-        <router-link v-for="session in sessions" :to="{name: 'Live Session', params: {sessionId: session.id}}" class="route-link">
-            <li>{{session.name}} - {{session.lab_name}}</li>
+        <router-link 
+            v-for="session in sessions" 
+            :to="{name: 'Live Session', params: 
+            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.id}}" 
+            class="route-link">
+                <li>{{session.name}} - {{session.lab_name}}</li>
         </router-link>
     </ul>
     <div class="add-session-wrapper">
