@@ -37,7 +37,8 @@
         methods: { 
             getUsers() {
                 const path = 'http://localhost:5001/userlist';
-                axios.get(path)
+                const accessToken = localStorage.getItem('token')
+                axios.get(path, {headers: {'Authorization': accessToken}})
                 .then((res) => {
                     this.users=res.data;
                 })

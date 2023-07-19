@@ -16,7 +16,7 @@
         </div>
         <div class="input-text-box">
            <label> Role:</label><br>
-            <select v-model="role" class= "form-control" name="roles" id="roles">
+            <select v-model="role" class="form-control" name="roles" id="roles">
                 <option value="student" >Student</option>
                 <option value="instructor" >Instructor</option>
                 <option value="admin" >Admin</option>

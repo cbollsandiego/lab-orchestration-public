@@ -123,6 +123,12 @@ class Labs(db.Model):
     questions=db.Column(db.String, nullable=False)
     num_questions = db.Column(db.Integer, nullable=False)
 
+    def serialize(self):
+        return {
+            'id': self.lab_id,
+            'title': self.title
+        }
+
 class Student_lab (db.Model): 
    __tablename__= "student_answers"
    answer_id=db.Column(db.Integer, primary_key=True)

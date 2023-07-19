@@ -7,6 +7,7 @@ import UserList from '../components/UserList.vue'
 import CourseList from '../components/CourseList.vue'
 import MyCourses from '../components/MyCourses.vue'
 import CreateCourse from '../components/CreateCourse.vue'
+import Course from '../components/Course.vue'
 import CreateUser from '../components/CreateUser.vue'
 import Groups from '../components/Groups.vue'
 
@@ -52,6 +53,11 @@ const router = createRouter({
       path: '/course/create',
       name: 'Course Create',
       component: CreateCourse
+    },
+    {
+      path: '/course/:course_name/:semester/:section',
+      name: 'Course',
+      component: Course
     },
     {
       path: '/createuser',
