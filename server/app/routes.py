@@ -351,8 +351,6 @@ def session(course_id, session_id):
     return render_template('groups.html', course=course, session=session, groups=groups, add_to_group_form=add_to_group_form, new_group_form=new_group_form)
 
 @app.route('/groups/<int:course_id>/<int:group_id>/remove/<int:user_id>', methods=['POST'])
-@login_required
-@instructor_required
 def remove_from_group(course_id, group_id, user_id):
     group = Group.query.get_or_404(group_id)
     user = User.query.get_or_404(user_id)
@@ -362,8 +360,6 @@ def remove_from_group(course_id, group_id, user_id):
     return redirect(url_for('groups', course_id=course_id))
 
 @app.route('/delete_group/<int:group_id>', methods=['POST'])
-@login_required
-@instructor_required
 def delete_group(group_id):
     form = EmptyForm()
     if form.validate_on_submit():
@@ -527,24 +523,46 @@ def send_command(group_id, command):
     print(str(group_id))
     emit('command', (group_id, command), to=str(session_id))
 
-@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups",methods=['GET'])
-def get_groups(course_name, semester,section_num,session_name):
-    course_id=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
-    session=Session.query.filter_by(course_id=course_id,name=session_name).first_or_404()
-    groups=Group.query.filter_by(session_id=session.id).all()
-    dict=[]
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups", methods=['GET'])
+def get_groups(course_name, semester, section_num, session_name):
+    course_id = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section_num).first_or_404().id
+    session = Session.query.filter_by(course_id=course_id,name=session_name).first_or_404()
+    groups = Group.query.filter_by(session_id=session.id).all()
+    all_student_names = [{'name': user.name, 'id': user.id} for user in User.query.join(user_course).filter(user_course.c.course_id==course_id).order_by(User.name).all()]
+    dict = []
     for group in groups:
-        student_names=[]
-        students=User.query.join(user_group).filter(user_group.c.group_id==group.id).all()
+        student_names = []
+        students = User.query.join(user_group).filter(user_group.c.group_id==group.id).all()
         for student in students:
-            student_names.append(student.name)
-        dict.append({"name":group.group_name,"members":student_names})
-    sessions=Session.query.filter(Session.course_id== course_id, Session.name!= session.name).all()
-    json_sessions=[s.serialize() for s in sessions]
-    return {"groups":dict, "old_sessions":json_sessions}
+            if {'name': student.name, 'id': student.id} in all_student_names: all_student_names.remove({'name': student.name, 'id': student.id})
+            student_names.append({'name': student.name, 'id': student.id})
+        dict.append({"name": group.group_name, "members": student_names})
+    sessions = Session.query.filter(Session.course_id==course_id, Session.name!=session.name).all()
+    json_sessions = [s.serialize() for s in sessions]
+    return {"groups":dict, "old_sessions":json_sessions, "not_in_group": all_student_names}
 
-
-
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/postgroups", methods=['POST'])
+def post_groups(course_name, semester,section_num,session_name):
+    data = request.get_json()
+    course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section_num).first()
+    session = Session.query.filter_by(course_id=course.id,name=session_name).first()
+    lab = Labs.query.get(session.lab_id)
+    try:
+        db.session.query(Group).filter(Group.session_id==session.id).delete()
+        db.session.commit()
+        for group in data.get('groups'): 
+            newGroup = Group(group_name=group.get('name'), course_id=course.id, session_id=session.id, max_progress=lab.num_questions)
+            db.session.add(newGroup)
+            print(group.get('members'))
+            for member in group.get('members'):
+                user = User.query.filter_by(name=member.get('name')).first()
+                newGroup.users.append(user)
+                db.session.add(newGroup)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return {'status': 'failure'}
+    return {'status': 'success'}
 
 @socketio.on('ping')
 def get_ping():
