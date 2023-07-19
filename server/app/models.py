@@ -108,7 +108,7 @@ class Group(db.Model):
     at_checkpoint = db.Column(db.Boolean, default=False)
     progress = db.Column(db.Integer, default=0)
     max_progress = db.Column(db.Integer)
-
+ 
     def __repr__(self):
         return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id}, hand_raised={self.hand_raised}, at_checkpoint={self.at_checkpoint}, progress={self.progress})"
 
@@ -134,7 +134,7 @@ class Student_lab (db.Model):
    answer_id=db.Column(db.Integer, primary_key=True)
    question_num=db.Column(db.Integer)
    group_name=db.Column(db.String)
-   course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
+   session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
    submit_time =db.Column(db.TIMESTAMP)
    saved_answer=db.Column(db.String)
 

@@ -9,12 +9,13 @@ import MyCourses from '../components/MyCourses.vue'
 import CreateCourse from '../components/CreateCourse.vue'
 import Course from '../components/Course.vue'
 import CreateUser from '../components/CreateUser.vue'
+import Groups from '../components/Groups.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/livesession/:sessionId',
+      path: '/:course_name/:semester/:section/:session/livesession',
       name: 'Live Session',
       component: InstructorLive
     },
@@ -63,7 +64,12 @@ const router = createRouter({
       name: 'Course User',
       component: CreateUser
 
-    }
+    },
+    {
+      path: '/:course_name/:semester/:section/:session/groups',
+      name: 'Create Groups',
+      component: Groups
+    },
   ]
 })
 

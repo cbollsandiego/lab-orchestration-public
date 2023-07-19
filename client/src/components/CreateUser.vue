@@ -7,8 +7,8 @@
             <input type="text" v-model="name" class="form-control">
         </div>
         <div class="input-text-box">
-            <label>Id:</label>
-            <input type="text" v-model="id" class="form-control">
+            <label>Password:</label>
+            <input type="text" v-model="password" class="form-control">
         </div>
         <div class="input-text-box">
             <label>Email:</label>
@@ -16,7 +16,7 @@
         </div>
         <div class="input-text-box">
            <label> Role:</label><br>
-            <select  class= "form-control" name="roles" id="roles">
+            <select v-model="role" class= "form-control" name="roles" id="roles">
                 <option value="student" >Student</option>
                 <option value="instructor" >Instructor</option>
                 <option value="admin" >Admin</option>
@@ -36,7 +36,7 @@ export default {
     data() {
         return {
             name: '',
-            id: '',
+            password: '',
             email: '',
             role: '',
             alertMessage: "",
@@ -50,32 +50,37 @@ export default {
         createUser() {
             console.log('yeah yeah awesome')
             const path = 'http://localhost:5001/createuser'
-            const newUser = { 'id': this.id, 'name': this.name, 'email': this.email, 'role': this.role }
+            const newUser = { 'password': this.password, 'name': this.name, 'email': this.email, 'role': this.role }
+            const accessToken= localStorage.getItem("token")
 
-            axios.post(path, newUser)
+            axios.post(path, newUser, {headers:{"Authorization":accessToken}})
                 .then((response) => {
                     if (response.data.status === 'exists') {
                         this.alertMessage = 'User already exists. Change name, id, or email'
                         this.alertSuccess = false
                     }
                     else if (response.data.status === 'noname') {
-                        this.alertMessage = 'Name not found in database.'
+                        this.alertMessage = 'Name required.'
                         this.alertSuccess = false
                     }
-                    else if (response.data.status === 'noid') {
-                        this.alertMessage = 'ID required.'
+                    else if (response.data.status === 'nopassword') {
+                        this.alertMessage = 'Password required.'
                         this.alertSuccess = false
                     }
-                    else if (response.data.status === 'nosem') {
+                    else if (response.data.status === 'noemail') {
                         this.alertMessage = ' Email required.'
                         this.alertSuccess = false
 
+                    }
+                    else if (response.data.status === 'norole') {
+                        this.alertMessage = ' Role required.'
+                        this.alertSuccess = false
                     }
                     else {
                         this.alertMessage = 'User successfully created.'
                         this.alertSuccess = true
                         this.name = ''
-                        this.id = ''
+                        this.password = ''
                         this.email = ''
                         this.role = ''
                     }

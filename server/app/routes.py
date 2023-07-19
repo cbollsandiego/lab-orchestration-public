@@ -73,20 +73,27 @@ def user_list(current_user):
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
 
-@app.route('/create_user', methods=['GET', 'POST'])
-def create_user():
-    form = CreateUserForm()
-    if form.validate_on_submit():
-        email_exists = User.query.filter_by(email=form.email.data).first()
-        if email_exists:
-            flash('Email already in use!')
-            return redirect(url_for('create_user'))
-        new_user = User(name=form.name.data, email=form.email.data, role=form.role.data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('User created!')
-        return redirect(url_for('create_user'))
-    return render_template('create_user.html', form=form)
+
+@app.route('/createuser', methods=["POST"])
+@login_req('admin')
+def createuser(current_user):
+    data= request.get_json()
+    email_exists = User.query.filter_by(email=data.get("email")).first()
+    if email_exists:
+        return{"status":"exists"}
+    if data.get("name").strip() == "":
+        return {"status":"noname"}
+    if data.get("password").strip() == "":
+        return {"status":"nopassword"}
+    if data.get("email").strip() == "":
+        return {"status":"noemail"}
+    if data.get("role").strip() == "":
+        return {"status":"norole"}
+    
+    new_user= User(data.get("name"),data.get("email"),data.get("role"), data.get("password"))
+    db.session.add(new_user)
+    db.session.commit()
+    return{"status":"successful"}
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
@@ -315,7 +322,6 @@ def delete_course(course_id):
     return redirect(url_for('index'))
 
 @app.route('/course/<int:course_id>/<int:session_id>', methods=['GET', 'POST'])
-@login_required
 def session(course_id, session_id):
     course = Course.query.get_or_404(course_id)
     session = Session.query.get_or_404(session_id)
@@ -323,9 +329,8 @@ def session(course_id, session_id):
     users = User.query.join(user_course).filter(user_course.c.course_id == course_id).order_by(User.name).all()
     user_choices = [(str(user.id), user.name) for user in users]
     group_choices = [(str(group.id), group.group_name) for group in groups]
-    add_to_group_form = AddToGroupForm(possible_students=user_choices, groups=group_choices
-                        ) if current_user.role == 'admin' or current_user.id == course.course_instructor else None
-    new_group_form = CreateGroupForm() if current_user.role == 'admin' or current_user.id == course.course_instructor else None
+    add_to_group_form = AddToGroupForm(possible_students=user_choices, groups=group_choices)
+    new_group_form = CreateGroupForm()
 
     if add_to_group_form and add_to_group_form.validate_on_submit() and add_to_group_form.submit_add_to_group.data:
         group_add = Group.query.get_or_404(add_to_group_form.group.data)
@@ -381,9 +386,10 @@ def my_courses(current_user):
     json_courses = [course.serialize() for course in courses]
     return json_courses
 
-@app.route('/labs/fetch/<int:session_id>')
-def lab_fetcher(session_id):
+@app.route('/labs/fetch/<course_name>/<semester>/<int:section_num>/<session>')
+def lab_fetcher(course_name,semester,section_num,session):
     dict = []
+    session_id=Session.query.filter_by(name=session).first().id
     groups = Group.query.filter_by(session_id=session_id)
     for group in groups:
         student_names = []
@@ -393,19 +399,21 @@ def lab_fetcher(session_id):
         dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
     return dict
 
-@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<int:group_num>",methods=['GET', 'POST'])
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_num>",methods=['GET', 'POST'])
 def student_view(course_name,session_name,group_num,semester,section_num):
     
    
     course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
-    lab_id=Session.query.filter_by(course_id=course,name= session_name).first_or_404().lab_id
+    session=Session.query.filter_by(course_id=course,name= session_name).first_or_404()
+    lab_id=session.lab_id
+    session_id=session.id
     lab=Labs.query.filter_by (lab_id=lab_id).first_or_404()
     # the file is beung read through a string (change to read from file)
     f=lab.questions
     
     
     
-    
+   # ADD THINGSLIKE GROUP BACK INTODATABASE 
     """[
     { f= open("...,"r")
     for .. in f
@@ -463,12 +471,12 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             group_name=group_num, 
             submit_time=now,
             saved_answer=post_data.get("answer")[str(post_data.get("id"))],
-            course_id=course)
+            session_id=session_id)
         
         db.session.add(student_lab) 
         db.session.commit()
        
-        group = Group.query.get(group_num)
+        group = Group.query.filter_by(group_name=group_num,session_id=session_id).first()
         if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
             db.session.add(group)
@@ -476,10 +484,10 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             session_id = group.session_id
             socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
     
-    progress=Group.query.get(group_num).progress
+    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first.progress
     response_object['progress']=progress
 
-    answers=Student_lab.query.filter_by (group_name=group_num, course_id=course).all()
+    answers=Student_lab.query.filter_by (group_name=group_num, session_id=session_id).all()
     for answer in answers:
         if response_object['answers'].get(answer.question_num)==None:
             response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
@@ -518,6 +526,25 @@ def send_command(group_id, command):
     db.session.commit()
     print(str(group_id))
     emit('command', (group_id, command), to=str(session_id))
+
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups",methods=['GET'])
+def get_groups(course_name, semester,section_num,session_name):
+    course_id=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
+    session=Session.query.filter_by(course_id=course_id,name=session_name).first_or_404()
+    groups=Group.query.filter_by(session_id=session.id).all()
+    dict=[]
+    for group in groups:
+        student_names=[]
+        students=User.query.join(user_group).filter(user_group.c.group_id==group.id).all()
+        for student in students:
+            student_names.append(student.name)
+        dict.append({"name":group.group_name,"members":student_names})
+    sessions=Session.query.filter(Session.course_id== course_id, Session.name!= session.name).all()
+    json_sessions=[s.serialize() for s in sessions]
+    return {"groups":dict, "old_sessions":json_sessions}
+
+
+
 
 @socketio.on('ping')
 def get_ping():
