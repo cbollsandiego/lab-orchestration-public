@@ -115,6 +115,25 @@ def delete_user(user_id):
 def get_user_id(current_user):
     return {'role': current_user.role}
 
+@app.route('/getcourse/student/<course_name>/<semester>/<int:section>')
+@login_req()
+def course_getter_student(current_user, course_name, semester, section):
+    course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section).first()
+    if course is None: 
+        return {'status': 'failure'}
+    students = User.query.join(user_course).filter(user_course.c.course_id == course.id).order_by(User.name).all()
+    if current_user not in students:
+        return {'status': 'failure'}
+    instructor = User.query.get(course.course_instructor)
+    sessions = Session.query.filter_by(course_id=course.id)
+    groups = []
+    for session in sessions:
+        g = Group.query.filter_by(session_id=session.id).first()
+        if g is not None:
+            groups.append({'session': session.name, 'group': g.group_name})
+    return {'status': 'success', 'name': course.course_name, 'instructor': instructor.name, 
+            'groups': groups}
+
 @app.route('/getcourse/instructor/<course_name>/<semester>/<int:section>')
 @login_req('instructor')
 def course_getter(current_user, course_name, semester, section):
@@ -524,6 +543,7 @@ def send_command(group_id, command):
     emit('command', (group_id, command), to=str(session_id))
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups", methods=['GET'])
+@login_req('instructor')
 def get_groups(course_name, semester, section_num, session_name):
     course_id = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section_num).first_or_404().id
     session = Session.query.filter_by(course_id=course_id,name=session_name).first_or_404()
@@ -542,6 +562,7 @@ def get_groups(course_name, semester, section_num, session_name):
     return {"groups":dict, "old_sessions":json_sessions, "not_in_group": all_student_names}
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/postgroups", methods=['POST'])
+@login_req('instructor')
 def post_groups(course_name, semester,section_num,session_name):
     data = request.get_json()
     course = Course.query.filter_by(course_name=course_name, semester=semester, section_num=section_num).first()
