@@ -548,11 +548,6 @@ def post_groups(course_name, semester,section_num,session_name):
     session = Session.query.filter_by(course_id=course.id,name=session_name).first()
     lab = Labs.query.get(session.lab_id)
     try:
-        group_ids=[group.id for group in Group.query.filter_by(session_id=session.id).all()]
-        print(group_ids)
-        for group_id in group_ids:
-            print(user_group.delete().where(user_group.c.group_id == group_id))
-        db.session.commit()
         db.session.query(Group).filter(Group.session_id==session.id).delete()
         db.session.commit()
         for group in data.get('groups'): 

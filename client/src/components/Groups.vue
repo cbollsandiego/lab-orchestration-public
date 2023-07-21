@@ -1,17 +1,26 @@
 <template>
     <div class="full-page">
       <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
-      <button class="save-button" @click="postGroups">Save Groups</button>
-      <select class="form-select" v-model="importSession">
-        <option v-for="session in oldSessions" :key="session.name">
-          {{ session.name }}
-        </option>
-      </select>
-      <button class="import-button" @click="importGroups">Import Groups</button>
-      <br>
-      <button class="new-button" @click="newGroup()">New Group</button>
+      <h1>Groups for {{this.$route.params.course_name}} {{this.$route.params.session}}</h1>
+      <div class="import-wrapper">
+        <div class="import-text">Import from past lab:</div>
+        <div class="import-controls">
+          <select class="form-select" v-model="importSession">
+            <option disabled value="">Select lab to import from</option>
+            <option v-for="session in oldSessions" :key="session.name">
+              {{ session.name }}
+            </option>
+          </select>
+          <button class="import-button" @click="importGroups">Import</button>
+        </div>
+      </div>
+      <div class="buttons-wrapper">
+        <button class="new-button" @click="newGroup()">New Group</button>
+        <button class="save-button" @click="postGroups">Save Groups</button>
+        <button type="button" class="new-button" @click="this.showModal=true">Randomize Groups</button>
+      </div>
       <div class="group-box">
-        <div v-for="group in groups" :key="group.name" class="group">
+        <div v-for="group in groups" class="group">
           <h5>Group Name:</h5>
           <input type="text" v-model="group.name" @change="checkNames" class="name-input">
           <draggable class="list-group" v-model="group.members" group="groups" itemKey="group.members.id">
@@ -48,12 +57,16 @@ export default{
             oldSessions:[],
             notInGroup: [],
             importSession: undefined,
+            showModal: false,
             alertMessage: '',
             alertSuccess: false
         }
     },
     created() {
         this.getGroups()
+    },
+    beforeUnmount() {
+        this.postGroups()
     },
     methods: {
         getGroups() {
@@ -70,22 +83,29 @@ export default{
             })
         },
         async importGroups() {
+            if(!this.importSession) {
+                this.alertMessage = "You must select a lab to import"
+                this.alertSuccess = false
+                return
+            }
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.importSession}/getgroups`
             const accessToken = localStorage.getItem('token')
             await axios.get(path, {headers: {'Authorization': accessToken}})
             .then((res) => {
                 this.groups = res.data.groups
+                this.alertMessage = "Imported Successfully."
+                this.alertSuccess = true
             })
             .catch((error) => {
                 console.log(error)
             })
             this.postGroups()
         },
-        postGroups() {
+        async postGroups() {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/postgroups`
             const accessToken = localStorage.getItem('token')
             const payload = {'groups': this.groups}
-            axios.post(path, payload, {headers: {'Authorization': accessToken}})
+            await axios.post(path, payload, {headers: {'Authorization': accessToken}})
             .then((res) => {
                 if(res.data.status === 'success') {
                     this.alertMessage = 'Updated Groups'
@@ -167,5 +187,34 @@ export default{
 
 .list-group-item {
     cursor: grab;
+  }
+
+.buttons-wrapper {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 10px; 
+  }
+
+.import-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+    height: 100px;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+.import-controls {
+    display: flex;
+    gap: 10px;
+    height: 40px;
+  }
+
+.import-text {
+    margin-bottom: 8px;
+    font-weight: bold;
   }
 </style>

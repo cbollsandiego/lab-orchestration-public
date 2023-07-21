@@ -1,19 +1,25 @@
 from app import db, login
 from flask_login import UserMixin
 from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
+@db.event.listens_for(Engine, 'connect')
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute('PRAGMA foreign_keys=ON')
+    cursor.close()
+
 user_course = db.Table('user_course',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('course_id', db.Integer, db.ForeignKey('course.id'))
+    db.Column('course_id', db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'))
 )
 
 user_group = db.Table('user_group',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'))
 )
-
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
