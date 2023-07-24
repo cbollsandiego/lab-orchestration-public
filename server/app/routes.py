@@ -59,12 +59,29 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/user/<int:user_id>')
-@login_required
-def user(user_id, user_name,user_email,user_role):
-    user = User.query.filter_by(id=user_id).first_or_404()
-    form = EmptyForm() if current_user.role == 'admin' else None
-    return render_template('user.html', user=user, form=form)
+@app.route('/userlist/<int:user_id>',methods=['PUT','DELETE'])
+def user(user_id):
+    data={'status': 'success'}
+    print("Reached server")
+    if request.method == 'PUT':
+        user = User.query.filter_by(id=user_id).first()
+        if user is not None:
+            post_data = request.get_json()
+            user.name = post_data["name"]
+            user.role = post_data["role"]
+            db.session.add(user)
+            db.session.commit()
+            data['message'] = 'User updated!'
+            response_object = {'status': 'success'}
+    if request.method == 'DELETE':
+        print("Has delete method")
+        user = User.query.filter_by(id=user_id).first()
+        print(user)
+        db.session.delete(user)
+        db.session.commit()
+        data['message'] = 'User deleted!'
+        response_object = {'status': 'success'}
+    return jsonify(data)
 
 @app.route('/userlist')
 @login_req('admin')

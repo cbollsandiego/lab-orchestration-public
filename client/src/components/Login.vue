@@ -9,7 +9,7 @@
             <label for="loginEmail" class="form-label">Email:</label>
             <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email">
             <label for="loginPass" class="form-label">Password:</label>
-            <input type="text" class="form-control" id="loginPass" v-model="loginForm.pass" placeholder="Enter Password">
+            <input type="password" class="form-control" id="loginPass" v-model="loginForm.pass" placeholder="Enter Password">
         </div>
         <div>
             <button type="button" class="btn btn-primaty btn-sm" @click="handleLoginSubmit">Login</button>
