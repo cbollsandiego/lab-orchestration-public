@@ -158,14 +158,7 @@ export default {
 }
 </script>
 <style scoped>
-  .create-course-button {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
+ 
 
   html, body {
     height: 100%;
