@@ -1,65 +1,91 @@
 <template>
-    <div> 
-        <div v-if="message!=''">
+    <div>
+        <div v-if="message != ''">
             <alert :message="message"></alert>
         </div>
-      <form>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-        <div class="mb-3">
-            <label for="loginEmail" class="form-label">Email:</label>
-            <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email">
-            <label for="loginPass" class="form-label">Password:</label>
-            <input type="password" class="form-control" id="loginPass" v-model="loginForm.pass" placeholder="Enter Password">
-        </div>
-        <div>
-            <button type="button" class="btn btn-primaty btn-sm" @click="handleLoginSubmit">Login</button>
-        </div>
-      </form>
+        <form>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+            <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email:</label>
+                <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email">
+                <label for="loginPass" class="form-label">Password:</label>
+                <input type="text" class="form-control" id="loginPass" v-model="loginForm.pass"
+                    placeholder="Enter Password">
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-success" @click="handleLoginSubmit">Login</button>
+            </div>
+        </form>
     </div>
-  </template>
+</template>
 
 <script>
-    import axios from 'axios';
-    import Alert from './Alert.vue';
-    export default {
-        data() {
-            return {
-                message: "",
-                loginForm: {
-                    email: '',
-                    pass: ''
-                }
+import axios from 'axios';
+import Alert from './Alert.vue';
+export default {
+    data() {
+        return {
+            message: "",
+            loginForm: {
+                email: '',
+                pass: ''
+            }
+        };
+    },
+    components: {
+        alert: Alert,
+    },
+    methods: {
+        handleLoginSubmit() {
+            const payload = {
+                email: this.loginForm.email,
+                pass: this.loginForm.pass
             };
+            this.checkEmail(payload);
+            this.initForm();
         },
-        components:{
-            alert:Alert,
+        checkEmail(payload) {
+            const path = 'http://localhost:5001/login';
+            axios.post(path, payload)
+                .then((response) => {
+                    this.message = 'Logged in!'
+                    console.log(response.data)
+                    localStorage.setItem('token', response.data.token)
+                    console.log(response.data)
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         },
-        methods: {
-            handleLoginSubmit() {
-                const payload = {
-                    email: this.loginForm.email,
-                    pass: this.loginForm.pass
-                };
-                this.checkEmail(payload);
-                this.initForm();
-            },
-            checkEmail(payload) {
-                const path = 'http://localhost:5001/login';
-                axios.post(path, payload)
-                    .then((response) => {
-                        this.message = 'Logged in!'
-                        console.log(response.data)
-                        localStorage.setItem('token', response.data.token)
-                        console.log(response.data)
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            },
-            initForm() {
-                this.loginForm.email = '';
-            },
+        initForm() {
+            this.loginForm.email = '';
         },
-    };
+    },
+};
 </script>
+<style scoped >
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lab-header{
+    background-color: #f2f2f2;
+  }
+  
+  .mb-3 {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+
+  .text {
+    padding: 10px;
+    width: 740px;
+  }
+</style>
