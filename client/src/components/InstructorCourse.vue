@@ -7,7 +7,7 @@
         <router-link 
             v-for="session in sessions" 
             :to="{name: 'Live Session', params: 
-            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.id}}" 
+            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name}}" 
             class="route-link">
                 <li>{{session.name}} - {{session.lab_name}}</li>
         </router-link>
