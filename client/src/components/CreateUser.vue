@@ -87,6 +87,7 @@ export default {
                 })
                 .catch((error) => {
                     console.log(error)
+                    this.$router.push({ name: 'Login'})
                 })
         }
     }
@@ -126,12 +127,6 @@ body {
 </style>
 
 
-For the role, there are only four choices: admin, instructor, 
-lab assistant, and student. 
-I would suggest using a drop down for these choices then. 
 
-You will have to change the routes for the page
-the other change that needs to be made to your lab page is to
- pull the lab from the database instead of having it hardcoded
 
 
