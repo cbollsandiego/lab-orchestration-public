@@ -21,9 +21,9 @@
           </router-link>
         </div>
       </div>
-      <router-link :to="{ name: 'Login' }">
+     <!-- <router-link :to="{ name: 'Login' }">
         <button v-if="!loggedIn" class="btn btn-outline-success" type="submit">Login</button>
-      </router-link>
+      </router-link>-->
       <button v-if="loggedIn" class="btn btn-outline-danger" type="submit" @click="logout">Logout</button>
     </div>
   </nav>

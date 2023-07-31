@@ -52,7 +52,7 @@ const router = createRouter({
     },
     {
       path: '/course/create',
-      name: 'Course Create',
+      name: 'Create Course',
       component: CreateCourse
     },
     {

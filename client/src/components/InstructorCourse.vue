@@ -1,25 +1,33 @@
 <template>
     <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
-    <h1>{{this.name}}</h1>
-    <h3>{{this.instructor}}</h3>
+    <h1>{{ this.name }}</h1>
+    <h3>{{ this.instructor }}</h3>
     <h4>Lab Sessions</h4>
-    <ul>
-        <router-link 
-            v-for="session in sessions" 
-            :to="{name: 'Live Session', params: 
+
+   <li  v-for="session in sessions">
+   
+    <router-link 
+     :to="{name: 'Live Session', params: 
             {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name}}" 
             class="route-link">
-                <li>{{session.name}} - {{session.lab_name}}</li>
+                {{session.name}} - {{session.lab_name}}
         </router-link>
-    </ul>
-    <div class="add-session-wrapper">
+
+    <router-link 
+     :to="{name: 'Create Groups', params:
+            { course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }
+    }"   class="route-link">
+             (Create Groups)
+    </router-link>
+</li>
+ <div class="add-session-wrapper">
         <div class="input-text-box">
             <label>Add lab session:</label>
             <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
         </div>
         <select v-model="newSessionLab">
             <option disabled value="">Choose Lab Template</option>
-            <option v-for="lab in labs">{{lab.title}}</option>
+            <option v-for="lab in labs">{{ lab.title }}</option>
         </select>
         <button @click="addSession" class="create-session">Create Session</button>
     </div>
@@ -43,7 +51,7 @@
             <label>Remove student:</label>
             <select v-model="memberToRemove" class="form-select">
                 <option disabled value="">Select student to remove</option>
-                <option v-for="member in members">{{member.name}}</option>
+                <option v-for="member in members">{{ member.name }}</option>
             </select>
             <button @click="removeStudent(memberToRemove)" class="remove-student">Remove Student</button>
         </div>
@@ -88,7 +96,7 @@ export default {
         }
     },
     props: {
-        currentUserRole: {type: String}
+        currentUserRole: { type: String }
     },
     components: {
         Alert
@@ -100,9 +108,9 @@ export default {
         getInfo() {
             const path = `http://localhost:5001/getcourse/instructor/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}`
             const accessToken = localStorage.getItem('token')
-            axios.get(path, {headers: {'Authorization': accessToken}})
+            axios.get(path, { headers: { 'Authorization': accessToken } })
                 .then((res) => {
-                    if(res.data.status === 'success') {
+                    if (res.data.status === 'success') {
                         this.name = res.data.name
                         this.instructor = res.data.instructor
                         this.members = res.data.members
@@ -112,21 +120,21 @@ export default {
                 })
                 .catch((error) => {
                     console.log(error)
-                    this.$router.push({ name: 'Login'})
+                    this.$router.push({ name: 'Login' })
                 })
-            window.scrollTo(0,0)
+            window.scrollTo(0, 0)
         },
         async removeStudent(studentToRemove) {
-            if(!studentToRemove){
+            if (!studentToRemove) {
                 this.alertMessage = 'Select a student to remove'
                 this.alertSuccess = false
                 return;
             }
             const path = `http://localhost:5001/removefromcourse/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}`
             const accessToken = localStorage.getItem('token')
-            await axios.post(path, {'student_name': studentToRemove}, {headers: {'Authorization': accessToken}})
+            await axios.post(path, { 'student_name': studentToRemove }, { headers: { 'Authorization': accessToken } })
                 .then((res) => {
-                    if(res.data.status === 'success') {
+                    if (res.data.status === 'success') {
                         this.alertMessage = studentToRemove + ' removed from course.'
                         this.alertSuccess = true
                     }
@@ -143,16 +151,16 @@ export default {
             this.getInfo()
         },
         async addSession() {
-            if(!this.newSessionLab || !this.newSessionName) {
+            if (!this.newSessionLab || !this.newSessionName) {
                 this.alertMessage = 'Select a lab and choose a valid session name'
                 this.alertSuccess = false
                 return;
             }
             const path = `http://localhost:5001/addsession/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}`
             const accessToken = localStorage.getItem('token')
-            await axios.post(path, {'lab': this.newSessionLab, 'name': this.newSessionName.trim()}, {headers: {'Authorization': accessToken}})
+            await axios.post(path, { 'lab': this.newSessionLab, 'name': this.newSessionName.trim() }, { headers: { 'Authorization': accessToken } })
                 .then((res) => {
-                    if(res.data.status === 'success') {
+                    if (res.data.status === 'success') {
                         this.alertMessage = 'Added new session'
                         this.alertSuccess = true
                         this.newSessionLab = null
@@ -173,7 +181,7 @@ export default {
         async addFromFile(event) {
             const file = event.target.files[0]
             console.log(file)
-            if(file.type != 'text/csv') {
+            if (file.type != 'text/csv') {
                 this.alertMessage = 'Invalid file type. Try again.'
                 this.alertSuccess = false
                 return;
@@ -182,9 +190,9 @@ export default {
             formData.append("csv", file)
             const path = `http://localhost:5001/addfromfile/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}`
             const accessToken = localStorage.getItem('token')
-            await axios.post(path, formData, {headers: {'Authorization': accessToken, 'Content-Type': 'multipart/form-data'}})
+            await axios.post(path, formData, { headers: { 'Authorization': accessToken, 'Content-Type': 'multipart/form-data' } })
                 .then((res) => {
-                    if(res.data.status === 'success') {
+                    if (res.data.status === 'success') {
                         this.alertMessage = 'Added all students from file'
                         this.alertSuccess = true
                     }
@@ -200,16 +208,16 @@ export default {
 
         },
         async addFromName() {
-            if(!this.newMemberName){
+            if (!this.newMemberName) {
                 this.alertMessage = 'Enter the new student\'s name'
                 this.alertSuccess = false
                 return;
             }
             const path = `http://localhost:5001/addfromname/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}`
             const accessToken = localStorage.getItem('token')
-            await axios.post(path, {'student_name': this.newMemberName.trim()}, {headers: {'Authorization': accessToken}})
+            await axios.post(path, { 'student_name': this.newMemberName.trim() }, { headers: { 'Authorization': accessToken } })
                 .then((res) => {
-                    if(res.data.status === 'success') {
+                    if (res.data.status === 'success') {
                         this.alertMessage = this.newMemberName + ' added to course.'
                         this.alertSuccess = true
                         this.newMemberName = ''
@@ -252,7 +260,7 @@ export default {
 
 .all {
     width: 600px;
-  }
+}
 
 .add-remove-wrapper {
     display: flex;

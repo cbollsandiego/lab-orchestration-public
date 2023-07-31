@@ -3,11 +3,12 @@
         <table class="table table-striped table-bordered">
             <thead>
 
-                <router-link :to="{ name: 'Course Create' }" class="route-link">
+                <router-link :to="{ name: 'Create Course' }" class="route-link">
                     <button>
-                        <a class="nav-link"> Course Create</a>
+                        <a class="nav-link"> Create Course</a>
                     </button>
                 </router-link>
+                
 
 
 

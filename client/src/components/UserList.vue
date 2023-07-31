@@ -2,6 +2,11 @@
     <div class="full-page">
     <div class="container">
         <alert :message="message" :isSuccess="alertSuccess" v-if="showMessage"></alert>
+        <router-link :to="{ name: 'Create User' }" class="route-link">
+                    <button>
+                        <a class="nav-link"> Create User</a>
+                    </button>
+                </router-link>
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
