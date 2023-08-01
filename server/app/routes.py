@@ -394,7 +394,7 @@ def student_view(course_name,session_name,group_num,semester,section_num):
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups", methods=['GET'])
 @login_req('instructor')
-def get_groups(course_name, semester, section_num, session_name):
+def get_groups(current_user, course_name, semester, section_num, session_name):
     '''
     This is used to get all the groups that are associated with a certain lab session.
     This is called from the Create Groups page, and sends all the groups that are in the database along with students that are 
@@ -423,7 +423,7 @@ def get_groups(course_name, semester, section_num, session_name):
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/postgroups", methods=['POST'])
 @login_req('instructor')
-def post_groups(course_name, semester,section_num,session_name):
+def post_groups(current_user, course_name, semester,section_num,session_name):
     '''
     This is used to save the groups that have been made in the Create Groups page.
     When the instructor presses 'save groups', all the groups and users in each group are sent to this route, where they are all
@@ -444,7 +444,6 @@ def post_groups(course_name, semester,section_num,session_name):
         for group in data.get('groups'): 
             newGroup = Group(group_name=group.get('name'), course_id=course.id, session_id=session.id, max_progress=lab.num_questions)
             db.session.add(newGroup)
-            print(group.get('members'))
             for member in group.get('members'):
                 user = User.query.filter_by(name=member.get('name')).first()
                 newGroup.users.append(user)

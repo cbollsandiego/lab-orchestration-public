@@ -17,7 +17,7 @@
       <div class="buttons-wrapper">
         <button class="new-button" @click="newGroup()">New Group</button>
         <button class="save-button" @click="postGroups">Save Groups</button>
-        <button type="button" class="new-button" @click="this.showModal=true">Randomize Groups</button>
+        <button type="button" class="new-button" @click="randomize">Randomize Groups</button>
       </div>
       <div class="group-box">
         <div v-for="group in groups" class="group">
@@ -100,9 +100,9 @@ export default{
             .catch((error) => {
                 console.log(error)
             })
-            this.postGroups()
         },
         async postGroups() {
+            this.checkNames()
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/postgroups`
             const accessToken = localStorage.getItem('token')
             const payload = {'groups': this.groups}
@@ -114,6 +114,7 @@ export default{
                 }
                 else {
                     this.alertMessage = 'Failed to save groups'
+                    this.alertSuccess = false
                 }
             })
         },
@@ -122,8 +123,12 @@ export default{
         },
         checkNames() {
             for(let group of this.groups) {
-                if(this.groups.filter(x => x.name === group.name).length > 1) {
-                    group.name = group.name + '(1)'
+                if(group.name === '') {
+                    group.name = 'group'
+                }
+                let i = 1
+                while(this.groups.filter(x => x.name === group.name).length > 1) {
+                    group.name = group.name + ` ${i}`
                 }
             }
         },
@@ -133,6 +138,29 @@ export default{
                 this.notInGroup.push(g.members[i])
             }
             this.groups = this.groups.filter(group => group.name != groupName)
+        },
+        randomize() {
+            for(let group of this.groups) {
+                for(let member of group.members) {
+                    this.notInGroup.push(member)
+                }
+                group.members = []
+            }
+            this.shuffleNotInGroup();
+            let i = 0
+            while(this.notInGroup.length != 0) {
+              console.log(this.groups)
+                this.groups[i%this.groups.length].members.push(this.notInGroup.shift())
+                i++;
+            }
+        },
+        shuffleNotInGroup() {
+            for(var i = this.notInGroup.length -1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = this.notInGroup[i];
+                this.notInGroup[i] = this.notInGroup[j];
+                this.notInGroup[j] = temp;
+            }
         }
     }
 }

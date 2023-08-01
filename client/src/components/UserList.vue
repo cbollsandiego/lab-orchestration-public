@@ -3,8 +3,8 @@
     <div class="container">
         <alert :message="message" :isSuccess="alertSuccess" v-if="showMessage"></alert>
         <router-link :to="{ name: 'Create User' }" class="route-link">
-                    <button>
-                        <a class="nav-link"> Create User</a>
+                    <button class="add-user">
+                        <a class="nav-link">New User</a>
                     </button>
                 </router-link>
         <table class="table table-striped table-bordered">
@@ -313,6 +313,7 @@ html, body {
 }
 
 .add-question,
+.add-user,
 .create-lab-button {
   background-color: #4caf50;
   color: #fff;

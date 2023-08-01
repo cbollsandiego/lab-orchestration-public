@@ -24,7 +24,6 @@ def login_req(*role):
                 return jsonify(invalid_msg), 401
             try:
                 token = auth_headers[0]
-                print(token)
                 header_data = jwt.get_unverified_header(token)
                 data = jwt.decode(token, app.config['SECRET_KEY'], [header_data['alg']])
                 user = User.query.filter_by(email=data['sub']).first()

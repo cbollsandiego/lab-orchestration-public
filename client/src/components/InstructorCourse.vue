@@ -6,7 +6,7 @@
     <ul>
         <li v-for="session in sessions">
             <router-link 
-            :to="{name: 'Create Groups', params: 
+            :to="{name: 'Live Session', params: 
             {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name}}" 
             class="route-link">
                 {{session.name}} - {{session.lab_name}}
