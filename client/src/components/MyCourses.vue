@@ -44,7 +44,6 @@ export default {
         getMyCourses() {
             const path = 'http://localhost:5001/mycourses'
             let accessToken = localStorage.getItem('token')
-            console.log('okay, yeah')
             axios.get(path, {headers: {'Authorization': accessToken}})
             .then((res) => {
                 this.courses = res.data

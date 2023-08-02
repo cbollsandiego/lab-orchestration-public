@@ -48,15 +48,21 @@
                 const path = 'http://localhost:5001/login';
                 axios.post(path, payload)
                     .then((response) => {
-                        this.message = 'Logged in!'
-                        localStorage.setItem('token', response.data.token)
+                        if(response.data.status === 'failure') {
+                            this.message = 'Incorrect username or password.'
+                        }
+                        else {
+                            this.message = 'Logged in!'
+                            localStorage.setItem('token', response.data.token)
+                            this.$router.push({ name: 'My Courses'})
+                        }
                     })
                     .catch((error) => {
                         console.log(error);
                     });
             },
             initForm() {
-                this.loginForm.email = '';
+                this.loginForm.pass = '';
             },
         },
     };

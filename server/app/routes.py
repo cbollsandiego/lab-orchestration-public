@@ -20,8 +20,8 @@ def login():
         post_data = request.get_json()
         user = User.authenticate(**post_data)
         if user is None:
-            data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
-            return jsonify(data), 401
+            data['status'] = 'failure'
+            return jsonify(data)
         else:
             token = jwt.encode({
                 'sub': user.email,
@@ -29,7 +29,7 @@ def login():
                 'exp': datetime.utcnow() + timedelta(minutes=120)},
                 app.config['SECRET_KEY']
             )
-            data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
+            data['status'] = 'success'
             data['token'] = token
             return jsonify(data)
 
