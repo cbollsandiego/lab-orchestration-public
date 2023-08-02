@@ -57,8 +57,8 @@ export default {
             });
     },
     mounted() {
-        this.socket.on('command', (groupId, command) => {
-            var group = this.groups.find(group => group.group_id == groupId)
+        this.socket.on('command', (groupName, command) => {
+            var group = this.groups.find(group => group.name == groupName)
             switch(command) {
                 case 'handup': group.handRaised = true; break;
                 case 'handdown': group.handRaised = false; break;

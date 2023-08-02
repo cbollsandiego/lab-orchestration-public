@@ -16,13 +16,17 @@
           <span class="question-order">{{ question.order_num }}</span>
           <div class="btn-group-vertical">
             <button @click="moveUp(question.order_num)" class="btn btn-default">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up"
+                viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
               </svg>
             </button>
             <button @click="moveDown(question.order_num)" class="btn btn-default">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-chevron-down" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                  d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
               </svg>
             </button>
           </div>
@@ -30,8 +34,7 @@
             <textarea v-model="question.title" class="question-input"></textarea>
             <div class="form-check form-switch">
               <span>Checkpoint?</span>
-              <input type="checkbox" v-model="question.checkpoint" 
-                     id="flexSwitchCheckDefault" class="form-check-input">
+              <input type="checkbox" v-model="question.checkpoint" id="flexSwitchCheckDefault" class="form-check-input">
             </div>
           </div>
         </div>
@@ -41,21 +44,30 @@
       </div>
     </div>
 
-    <button @click="newQuestion" class="add-question">Add Question <b>+</b></button>
+    <button type="button" class="add-question" @click="handleSubmit(questions) && newQuestion">Add Question
+      <b>+</b></button>
+    <!--<alert :message="message" :isSuccess="alertSuccess" v-if="(newQuestion) == click && showMessage" @click="showMessage = false">
+                </alert>-->
     <button @click="submitNewLab" class="create-lab-button">Create Lab</button>
+    <button @click="deleteLab" class="btn btn-danger btn-sm my-2"> Delete Lab</button>
+    
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import Alert from './Alert.vue'
+import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js"
 export default {
   data() {
     return {
       title: "",
       questions: [],
       alertMessage: "",
-      alertSuccess: false
+      alertSuccess: false,
+      click: '',
+      //alertSuccess: true,
+      //showMessage: false,
     };
   },
   components: {
@@ -80,15 +92,15 @@ export default {
       }
     },
     moveUp(questionNum) {
-      if(questionNum !== 1) {
-        this.questions[questionNum-1].order_num = questionNum - 1;
-        this.questions[questionNum-2].order_num = questionNum;
+      if (questionNum !== 1) {
+        this.questions[questionNum - 1].order_num = questionNum - 1;
+        this.questions[questionNum - 2].order_num = questionNum;
         this.sortQuestions();
       }
     },
     moveDown(questionNum) {
-      if(questionNum !== this.questions.length) {
-        this.questions[questionNum-1].order_num = questionNum + 1;
+      if (questionNum !== this.questions.length) {
+        this.questions[questionNum - 1].order_num = questionNum + 1;
         this.questions[questionNum].order_num = questionNum;
         this.sortQuestions();
       }
@@ -96,16 +108,49 @@ export default {
     sortQuestions() {
       this.questions.sort((a, b) => a.order_num - b.order_num)
     },
+    handleSubmit(question) {
+      if (question) {
+        this.questionForm = question.order_num
+      };
+      console.log(this.questionForm);
+      const payload = {
+        answer: this.questionForm,
+
+      };
+      this.addAnswer(payload);
+
+    },
+    addAnswer(payload) {
+      const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
+      axios.post(path, payload)
+        .then(() => {
+          this.newQuestion();
+          this.click = payload
+        })
+        .catch((error) => {
+
+          console.log(error);
+          this.newQuestion();
+          
+          //this.alertSuccess = false;
+          //this.message='Error occurred when saving messsage'
+          // this.showMessage = true;
+        });
+
+        },
+        deleteLab(){
+
+        },
     submitNewLab() {
-      const newLab = { title: this.title, questions: this.questions, num_questions: this.questions.length };
+      const newLab = { title: this.title.trim(), questions: this.questions, num_questions: this.questions.length };
       const path = 'http://localhost:5001/newlab/submit'
       axios.post(path, newLab)
         .then((response) => {
-          if(response.data.status === 'failure') {
+          if (response.data.status === 'failure') {
             this.alertMessage = "Failure creating lab. Something went wrong."
             this.alertSuccess = false
           }
-          else if ( response.data.status =="name exists"){
+          else if (response.data.status == "name exists") {
             this.alertMessage = "Failure creating lab. Make sure the lab name is unique and no questions are blank."
             this.alertSuccess = false
           }
@@ -125,17 +170,18 @@ export default {
 </script>
 
 <style>
-
 .form-switch .form-check-input {
   height: 20px;
   width: 48px;
 }
+
 .form-switch .form-check-input:focus {
   border-color: rgba(0, 0, 0, 0.25);
   outline: 0;
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
 }
+
 .form-switch .form-check-input:checked {
   background-color: #4caf50;
   border-color: #4caf50;
@@ -143,7 +189,8 @@ export default {
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -274,5 +321,4 @@ html, body {
 
 .btn-group-vertical {
   margin-top: 10px;
-}
-</style>
+}</style>

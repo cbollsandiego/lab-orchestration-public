@@ -1,19 +1,25 @@
 from app import db, login
 from flask_login import UserMixin
 from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
+@db.event.listens_for(Engine, 'connect')
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute('PRAGMA foreign_keys=ON')
+    cursor.close()
+
 user_course = db.Table('user_course',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('course_id', db.Integer, db.ForeignKey('course.id'))
+    db.Column('course_id', db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'))
 )
 
 user_group = db.Table('user_group',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'))
 )
-
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,7 +36,7 @@ class User(UserMixin, db.Model):
         self.name = name
         self.email = email
         self.role = role
-        self.password = generate_password_hash(password, method='sha256')
+        self.password = generate_password_hash(password, method='scrypt')
 
     @classmethod
     def authenticate(cls, **kwargs):
@@ -108,7 +114,7 @@ class Group(db.Model):
     at_checkpoint = db.Column(db.Boolean, default=False)
     progress = db.Column(db.Integer, default=0)
     max_progress = db.Column(db.Integer)
-
+ 
     def __repr__(self):
         return f"Group(id={self.id}, group_name='{self.group_name}', course_id={self.course_id}, hand_raised={self.hand_raised}, at_checkpoint={self.at_checkpoint}, progress={self.progress})"
 
@@ -122,6 +128,12 @@ class Labs(db.Model):
     title= db.Column(db.String, nullable=False , unique=True)
     questions=db.Column(db.String, nullable=False)
     num_questions = db.Column(db.Integer, nullable=False)
+
+    def serialize(self):
+        return {
+            'id': self.lab_id,
+            'title': self.title
+        }
 
 class Student_lab (db.Model): 
    __tablename__= "student_answers"
@@ -137,6 +149,14 @@ class Session(db.Model):
     lab_id = db.Column(db.Integer, db.ForeignKey('labs.lab_id'))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     name = db.Column(db.String)
+
+    def serialize(self):
+        lab = Labs.query.get(self.lab_id)
+        return {
+            'id': self.id,
+            'lab_name': lab.title,
+            'name': self.name
+        }
 
 class CreateUser (UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

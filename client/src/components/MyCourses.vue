@@ -14,7 +14,14 @@
             <tbody>
                 <tr v-for="course in courses">
                     <td>{{course.id}}</td> 
-                    <td>{{course.course_name}}</td>
+                    <td>
+                        <router-link 
+                        :to="{name: 'Course', params: 
+                        {course_name: course.course_name, semester: course.semester, section: course.section_num}}" 
+                        class="Course">
+                        {{course.course_name}}
+                        </router-link>
+                    </td>
                     <td>{{course.semester}}</td>
                     <td>{{course.section_num}}</td>
                     <td>{{course.course_instructor}}</td>
@@ -44,6 +51,7 @@ export default {
             })
             .catch((error) => {
                 console.log(error)
+                this.$router.push({ name: 'Login'})
             })
         }
     },

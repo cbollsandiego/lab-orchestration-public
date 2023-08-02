@@ -97,7 +97,7 @@ export default {
                 });
         },
         sendCommand(command) {
-            this.socket.emit('command_send', this.$route.params.group, command);
+            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.group, command);
 
         },
         addAnswer(payload) {
@@ -152,7 +152,8 @@ export default {
     created() {
         this.getQuestions();
         this.socket = io("127.0.0.1:5001");
-        this.socket.emit("enter_room", this.$route.params.session);
+        const roomName = this.$route.params.course_name + ' ' + this.$route.params.session;
+        this.socket.emit("enter_room", roomName);
     },
 
 }

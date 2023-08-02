@@ -1,5 +1,11 @@
-{% extends 'base.html' %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}
+    {% if title %}{{ title }}{% else %}Lab{% endif %}
+  {% endblock %}</title>
+</head>
+<body>
     <h1>Groups for {{ course.course_name }} {{ session.name }}</h1>
     {% for group in groups %}
         <h2>{{ group.group_name }}</h2>
@@ -51,4 +57,4 @@
             return true;
         }
     </script>
-{% endblock %}
+</html>
