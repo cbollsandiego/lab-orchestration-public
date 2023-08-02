@@ -36,7 +36,7 @@ class User(UserMixin, db.Model):
         self.name = name
         self.email = email
         self.role = role
-        self.password = generate_password_hash(password, method='sha256')
+        self.password = generate_password_hash(password, method='scrypt')
 
     @classmethod
     def authenticate(cls, **kwargs):

@@ -123,11 +123,12 @@ def course_getter_student(current_user, course_name, semester, section):
         return {'status': 'failure'}
     instructor = User.query.get(course.course_instructor)
     sessions = Session.query.filter_by(course_id=course.id)
+    groups_in = Group.query.join(user_group).filter(user_group.c.user_id == current_user.id).all()
     groups = []
     for session in sessions:
-        g = Group.query.filter_by(session_id=session.id).first()
-        if g is not None:
-            groups.append({'session': session.name, 'group': g.group_name})
+        for g in groups_in:
+            if g.session_id == session.id:
+                groups.append({'session': session.name, 'group': g.group_name})
     return {'status': 'success', 'name': course.course_name, 'instructor': instructor.name, 
             'groups': groups}
 
@@ -481,13 +482,14 @@ def enter_room(room_name):
     join_room(str(room_name))
 
 @socketio.on('command_send')
-def send_command(group_id, command):
+def send_command(course_name, group_name, command):
     '''
     This is used to emit a signal that a group has raised their hand or reached a checkpoint.
     The signal is typically sent from the student live lab view and recieved in the instructor live lab view.
     '''
-    group = Group.query.get(group_id)
-    session_id = group.session_id
+    course = Course.query.filter_by(course_name=course_name).first()
+    group = Group.query.filter_by(group_name=group_name, course_id=course.id).first()
+    session_name = Session.query.get(group.session_id).name
     if command == "handup":
         group.hand_raised = True
     elif command == "handdown":
@@ -498,4 +500,5 @@ def send_command(group_id, command):
         group.at_checkpoint = False
     db.session.add(group)
     db.session.commit()
-    emit('command', (group_id, command), to=str(session_id))
+    room_name = course.course_name + ' ' + session_name
+    emit('command', (group_name, command), to=str(room_name))

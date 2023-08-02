@@ -20,7 +20,8 @@ export default {
     },
     created() {
         this.socketio = io("127.0.0.1:5001");
-        this.socketio.emit('enter_room', this.$route.params.session);
+        const roomName = this.$route.params.course_name + ' ' + this.$route.params.session;
+        this.socketio.emit("enter_room", roomName);
     },
     components: {
         GroupsSet

@@ -149,7 +149,6 @@ export default{
             this.shuffleNotInGroup();
             let i = 0
             while(this.notInGroup.length != 0) {
-              console.log(this.groups)
                 this.groups[i%this.groups.length].members.push(this.notInGroup.shift())
                 i++;
             }
