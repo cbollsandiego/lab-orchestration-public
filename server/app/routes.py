@@ -31,6 +31,7 @@ def login():
             )
             data['status'] = 'success'
             data['token'] = token
+            data['role'] = user.role
             return jsonify(data)
 
 @app.route('/userlist/<int:user_id>',methods=['PUT','DELETE'])

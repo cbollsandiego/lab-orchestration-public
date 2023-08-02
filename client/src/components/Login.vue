@@ -54,6 +54,7 @@
                         else {
                             this.message = 'Logged in!'
                             localStorage.setItem('token', response.data.token)
+                            localStorage.setItem('role', response.data.role)
                             this.$router.push({ name: 'My Courses'})
                         }
                     })
