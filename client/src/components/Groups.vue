@@ -44,6 +44,7 @@
 
 <script>
 import axios from 'axios';
+import { getTransitionRawChildren } from 'vue';
 import draggable from 'vuedraggable'
 import Alert from './Alert.vue'
 export default{
@@ -120,21 +121,27 @@ export default{
         },
         newGroup() {
             this.groups.push({name: '', members: []})
+            this.checkNames()
         },
         checkNames() {
+            let i = 1
             for(let group of this.groups) {
-                if(group.name === '') {
-                    group.name = 'group'
+                if(group.name === '' || group.name.slice(0,5) === 'Group') {
+                    group.name = 'Group' + ` ${i}`
+                    i++
                 }
-                let i = 1
-                while(this.groups.filter(x => x.name === group.name).length > 1) {
+            }
+            i = 1
+            for(let group of this.groups) {
+                while(this.groups.filter(x =>x.name === group.name).length > 1) {
                     group.name = group.name + ` ${i}`
+                    i++
                 }
             }
         },
         removeGroup(groupName) {
             let g = this.groups.find(group => group.name === groupName)
-            for(let i =0; i < g.members.length; i++) {
+            for(let i = 0; i < g.members.length; i++) {
                 this.notInGroup.push(g.members[i])
             }
             this.groups = this.groups.filter(group => group.name != groupName)
