@@ -504,3 +504,25 @@ def send_command(course_name, session_name, group_name, command):
     db.session.commit()
     room_name = course.course_name + ' ' + session_name
     emit('command', (group_name, command), to=str(room_name))
+
+@socketio.on('instructor_command')
+def instructor_command(course_name, session_name, group_name, command):
+    '''
+    This is used to emit a signal from an instructor to lower a group's hand or remove them from a checkpoint.
+    This is sent from the instructor live view and recieved in the student live view. 
+    '''
+    print(course_name)
+    print(session_name)
+    print(group_name)
+    course = Course.query.filter_by(course_name=course_name).first()
+    session = Session.query.filter_by(course_id=course.id, name=session_name).first()
+    group = Group.query.filter_by(group_name=group_name, course_id=course.id, session_id=session.id).first()
+    if command == 'handoff':
+        group.hand_raised = False
+    elif command == 'checkoff':
+        group.at_checkpoint = False
+    db.session.add(group)
+    db.session.commit()
+    room_name = course.course_name + ' ' + session_name
+    command_name = 'instructor_command_' + group_name
+    emit(command_name, (command), to=str(room_name))

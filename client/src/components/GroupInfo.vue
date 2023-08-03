@@ -6,10 +6,14 @@
       </ul>
       <div class="image-container">
         <div v-show="handRaised" class="image-wrapper">
-          <img src="../assets/handup.png" alt="Hand Raised" class="image" />
+          <div @click="handOff">
+            <img src="../assets/handup.png" alt="Hand Raised" class="image" />
+          </div>
         </div>
         <div v-show="atCheckpoint" class="image-wrapper">
-          <img src="../assets/check.png" alt="At Checkpoint" class="image" />
+          <div @click="checkOff">
+            <img src="../assets/check.png" alt="At Checkpoint" class="image" />
+          </div>
         </div>
       </div>
       <div class="progress" style="height: 30px;">
@@ -39,6 +43,14 @@
     computed: {
       progressPercent() {
         return (this.progress/this.maxProgress) * 100
+      }
+    },
+    methods: {
+      checkOff() {
+        this.$emit('instructorCommand', 'checkoff', this.name);
+      },
+      handOff() {
+        this.$emit('instructorCommand', 'handoff', this.name);
       }
     }
   }

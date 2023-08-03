@@ -15,6 +15,7 @@
                     :atCheckpoint="group.atCheckpoint"
                     :progress="group.progress"
                     :maxProgress="group.maxProgress"
+                    @instructorCommand="sendInstructorCommand"
                   />
                 </div>
               </div>
@@ -89,6 +90,17 @@ export default {
             group.score = value;
           }
           this.sortGroups();
+        },
+        sendInstructorCommand(command, groupName) {
+            var group = this.groups.find(group => group.name == groupName)
+            if(command === 'handoff') {
+              group.handRaised = false;
+            }
+            if(command === 'checkoff') {
+              group.atCheckpoint = false;
+            }
+            this.socket.emit('instructor_command', this.$route.params.course_name, this.$route.params.session, groupName, command);
+            this.sortGroups();
         }
     }
 }

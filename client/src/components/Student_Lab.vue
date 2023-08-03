@@ -154,6 +154,12 @@ export default {
         this.socket = io("127.0.0.1:5001");
         const roomName = this.$route.params.course_name + ' ' + this.$route.params.session;
         this.socket.emit("enter_room", roomName);
+        const command_name = 'instructor_command_' + this.$route.params.group
+        this.socket.on(command_name, (command) => {
+            if(command === 'handoff') {
+                this.handup = false
+            }
+        })
     },
 
 }
