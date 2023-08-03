@@ -158,39 +158,7 @@ export default {
 
 }
 </script>
-<style scoped>
-  .create-course-button {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
 
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .lab-header{
-    background-color: #f2f2f2;
-  }
-  
-  .full-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-
-  .input-text-box {
-    padding: 10px;
-    width: 740px;
-  }
-</style>
 
 
 

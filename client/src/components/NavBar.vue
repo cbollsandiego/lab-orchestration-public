@@ -55,9 +55,3 @@ export default {
 
 }
 </script>
-
-<style>
-.route-link {
-  text-decoration: none;
-}
-</style>

@@ -170,3 +170,208 @@
     padding: 10px;
     width: 740px;
   }
+  .group-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .card-title {
+    color: #333333;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  .card-title,
+  .small {
+    color: #555555;
+  }
+  ul.list-unstyled {
+    margin-bottom: 10px;
+  }
+  
+  .small {
+    font-size: 0.8rem;
+  }
+  
+  .image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .image-wrapper {
+    margin-right: 10px;
+  }
+  
+  .image {
+    width: 96px;
+    height: 96px;
+  }
+  
+  .progress-text {
+    margin-top: auto;
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+  }
+  
+  .new-button,
+.import-button,
+.save-button  {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+.remove-button {
+    background-color: #ff0000;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 6px;
+}
+.group-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+.group {
+    margin: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+.name-input {
+    margin-bottom: 10px;
+}
+
+.list-group-item {
+    cursor: grab;
+  }
+
+.buttons-wrapper {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 10px; 
+  }
+
+.import-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+    height: 100px;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+.import-controls {
+    display: flex;
+    gap: 10px;
+    height: 40px;
+  }
+
+.import-text {
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  .container {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+  }
+  
+  .card {
+    background-color: #f0f0f0;
+    margin-bottom: 10px;
+  }
+  
+  .card-body {
+    padding: 10px;
+  }
+  
+  .row-cols-1 > .col {
+    margin-bottom: 10px;
+  }
+  .remove-student {
+    background-color: #ff0000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.add-from-name,
+.create-session {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.all {
+    width: 600px;
+}
+
+.add-remove-wrapper {
+    display: flex;
+    width: 100%
+}
+
+.add-remove-element {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.remove-border {
+    border: 2px solid #ff0000;
+    padding: 52px 20px;
+}
+
+.table-wrapper {
+    padding: 8px 10px;
+    border: 2px solid black;
+    border-radius: 20px;
+}
+
+.add-session-wrapper {
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    padding: 10px
+}
+.bg-light {
+    background-color: #ffffff;
+}
+
+.lab-header{
+    background-color: #f2f2f2;
+}
+
+.mb-3 {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+
+.text {
+    padding: 10px;
+    width: 740px;
+}
+.route-link {
+    text-decoration: none;
+  }
