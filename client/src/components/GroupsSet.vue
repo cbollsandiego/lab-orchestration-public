@@ -71,6 +71,11 @@ export default {
             group.score = value;
             this.sortGroups();
         });
+        this.socket.on('progress_update', (groupName, questionNum) => {
+          var group = this.groups.find(group => group.name == groupName)
+          group.progress = questionNum
+          this.sortGroups();
+        })
     },
     methods: {
         sortGroups() {

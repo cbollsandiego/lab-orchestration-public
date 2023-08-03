@@ -97,10 +97,12 @@ export default{
                 this.groups = res.data.groups
                 this.alertMessage = "Imported Successfully."
                 this.alertSuccess = true
+                this.postGroups()
             })
             .catch((error) => {
                 console.log(error)
             })
+            this.$router.go(0)
         },
         async postGroups() {
             this.checkNames()

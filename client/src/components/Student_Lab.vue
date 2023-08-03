@@ -35,9 +35,9 @@
                         Checkpoint 
                     </h5>
                 
-                    <input class="" type="radio" value="Yes" @click="sendCommand('')" name="Si" id="yes"
+                    <input class="" type="radio" value="Yes" @click="sendCommand('checkon')" name="Si" id="yes"
                         checked="checked">Yes <br>
-                    <input class="" type="radio" value="No" @click="sendCommand('')" name="Si" id="no"
+                    <input class="" type="radio" value="No" @click="sendCommand('checkoff')" name="Si" id="no"
                         checked="checked">No<br>
 
 
@@ -97,7 +97,7 @@ export default {
                 });
         },
         sendCommand(command) {
-            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.group, command);
+            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.session, this.$route.params.group, command);
 
         },
         addAnswer(payload) {

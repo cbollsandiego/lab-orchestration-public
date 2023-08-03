@@ -21,6 +21,7 @@ export default {
     created() {
         this.socketio = io("127.0.0.1:5001");
         const roomName = this.$route.params.course_name + ' ' + this.$route.params.session;
+        console.log(roomName)
         this.socketio.emit("enter_room", roomName);
     },
     components: {
