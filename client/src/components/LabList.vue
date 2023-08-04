@@ -13,7 +13,11 @@
             </thead>
             <tbody>
                 <tr v-for="lab in labs">
-                    <td>{{ lab.title }}</td>
+                    <td>
+                        <router-link :to="{name: 'Lab Create', params: {labName: lab.title}}" class="route-link">
+                            {{ lab.title }}
+                        </router-link>
+                    </td>
                 </tr>
             </tbody>
         </table>

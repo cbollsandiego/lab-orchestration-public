@@ -16,7 +16,7 @@
           <router-link :to="{ name: 'User List' }" class="route-link" v-if="role == 'admin' || role == 'instructor'">
             <a class="nav-link">Users</a>
           </router-link>
-          <router-link :to="{ name: 'Lab Create' }" class="route-link" v-if="role == 'admin' || role == 'instructor'">
+          <router-link :to="{ name: 'Lab List' }" class="route-link" v-if="role == 'admin' || role == 'instructor'">
             <a class="nav-link">Labs</a>
           </router-link>
         </div>

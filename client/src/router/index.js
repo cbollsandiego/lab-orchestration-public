@@ -37,7 +37,7 @@ const router = createRouter({
       component: CourseList
     },
     {
-      path: '/lab/create',
+      path: '/lab/create/:labName?',
       name: 'Lab Create',
       component: CreateLab
     },

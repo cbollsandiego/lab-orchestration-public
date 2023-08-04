@@ -482,6 +482,35 @@ def newLab():
         return {'status': 'failure'}
     return {'status': 'success'}
 
+@app.route('/editlab/<lab_name>/get')
+@login_req('instructor')
+def editLabGetter(current_user, lab_name):
+    '''
+    This is used when editing a lab. It returns the information about the lab to the getter.
+    This is accessed when an instructor is trying to edit a lab that has already been created from the Lab List page.
+    '''
+    lab = Labs.query.filter_by(title=lab_name).first()
+    if lab is None:
+        return {'status': 'failure'}
+    return jsonify({'status': 'success', 'title': lab.title, 'questions': lab.questions})
+
+@app.route('/editlab/<lab_name>/post', methods=['POST'])
+@login_req('instructor')
+def editLabSubmit(current_user, lab_name):
+    '''
+    This is used when submitting a lab that has been edited.
+    This is accessed when an instructor edits a lab from the page.
+    '''
+    data = request.get_json()
+    lab = Labs.query.filter_by(title=lab_name).first()
+    if lab is None:
+        return {'status': 'failure'}
+    lab.questions = json.dumps(data.get('questions'))
+    lab.num_questions = int(data.get('num_questions'))
+    db.session.add(lab)
+    db.session.commit()
+    return {'status': 'success'}
+
 @socketio.on('enter_room')
 def enter_room(room_name):
     '''

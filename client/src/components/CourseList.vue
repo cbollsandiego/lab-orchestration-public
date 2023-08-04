@@ -1,4 +1,5 @@
 <template>
+    <div class="full-page">
     <div class="container">
         <table class="table table-striped table-bordered">
             <thead>
@@ -41,6 +42,7 @@
             </tbody>
         </table>
     </div>
+</div>
 </template>
 
 <script>
@@ -71,3 +73,14 @@ export default {
     }
 }
 </script>
+
+<style>
+.full-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+</style>

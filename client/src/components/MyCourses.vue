@@ -1,4 +1,5 @@
 <template>
+    <div class="full-page">
     <div class="container">
         <h1>My Courses</h1>
         <table class="table table-striped table-bordered">
@@ -29,6 +30,7 @@
             </tbody>
         </table>
     </div>
+</div>
 </template>
 
 <script>
@@ -59,3 +61,14 @@ export default {
     }
 }
 </script>
+
+<style>
+.full-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+</style>

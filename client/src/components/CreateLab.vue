@@ -7,7 +7,8 @@
     <div class="form-group">
       <div class="input-container">
         <label for="title" class="question-label"><b>Title:</b></label>
-        <input type="text" v-model="title" id="title" class="question-input title-input">
+        <input type="text" v-model="title" v-if="!this.$route.params.labName" id="title" class="question-input title-input">
+        <input type="text" v-model="title" v-if="this.$route.params.labName" id="title" class="question-input title-input" disabled>
       </div>
     </div>
     <div v-for="question in questions" :key="question.order_num" class="question">
@@ -44,11 +45,14 @@
       </div>
     </div>
 
-    <button type="button" class="add-question" @click="handleSubmit(questions) && newQuestion">Add Question
+    <button type="button" class="add-question" @click="newQuestion">Add Question
       <b>+</b></button>
     <!--<alert :message="message" :isSuccess="alertSuccess" v-if="(newQuestion) == click && showMessage" @click="showMessage = false">
                 </alert>-->
-    <button @click="submitNewLab" class="create-lab-button">Create Lab</button>
+    <div class="save-container">
+      <button @click="saveLab" class="save-lab-button">Save</button>
+      <button @click="saveAndQuit" class="quit-button">Save & Quit</button>
+    </div>
     <button @click="deleteLab" class="btn btn-danger btn-sm my-2"> Delete Lab</button>
     
   </div>
@@ -74,7 +78,12 @@ export default {
     alert: Alert
   },
   created() {
-    this.questions.push({ order_num: 1, title: "", type: "Question", checkpoint: false });
+      if(!this.$route.params.labName) {
+          this.questions.push({ order_num: 1, title: "", type: "Question", checkpoint: false });
+      }
+      else {
+          this.getOldLab()
+      }
   },
   methods: {
     newQuestion() {
@@ -120,7 +129,7 @@ export default {
       this.addAnswer(payload);
 
     },
-    addAnswer(payload) {
+    /*addAnswer(payload) {
       const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
       axios.post(path, payload)
         .then(() => {
@@ -140,7 +149,19 @@ export default {
         },
         deleteLab(){
 
-        },
+        },*/
+    saveLab() {
+        if(!this.$route.params.labName) {
+            this.submitNewLab()
+        }
+        else {
+            this.submitEdit()
+        }
+    },
+    saveAndQuit() {
+        this.saveLab()
+        this.$router.push({ name: 'Lab List'})
+    },
     submitNewLab() {
       const newLab = { title: this.title.trim(), questions: this.questions, num_questions: this.questions.length };
       const path = 'http://localhost:5001/newlab/submit'
@@ -164,6 +185,43 @@ export default {
         .catch((error) => {
           console.log(error)
         })
+    },
+    getOldLab() {
+        const path = `http://localhost:5001/editlab/${this.$route.params.labName}/get`
+        const accessToken = localStorage.getItem('token')
+        axios.get(path, {headers: {'Authorization': accessToken}})
+            .then((res) => {
+                if(res.data.status === 'success') {
+                    this.title = res.data.title;
+                    this.questions = JSON.parse(res.data.questions)
+                }
+                else {
+                    this.alertMessage = 'Failure fetching lab'
+                    this.alertSuccess = false
+                }
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+    },
+    submitEdit() {
+        const path = `http://localhost:5001/editlab/${this.$route.params.labName}/post`
+        const accessToken = localStorage.getItem('token')
+        const newLab = { questions: this.questions, num_questions: this.questions.length };
+        axios.post(path, newLab, {headers: {'Authorization': accessToken}})
+            .then((res) => {
+                if(res.data.status === 'failure') {
+                    this.alertMessage = 'Failure saving lab.'
+                    this.alertSuccess = false
+                }
+                else {
+                    this.alertMessage = 'Lab saved'
+                    this.alertSuccess = true
+                }
+            })
+            .catch((error) => {
+                console.log(error)
+            })
     }
   },
 };
@@ -292,6 +350,8 @@ body {
   border-radius: 3px;
 }
 
+.save-lab-button,
+.quit-button,
 .add-question,
 .create-lab-button {
   background-color: #4caf50;
@@ -300,6 +360,15 @@ body {
   padding: 10px 20px;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.save-lab-button {
+  margin: -10px;
+
+}
+
+.quit-button {
+  margin-left: 20px;
 }
 
 .add-question {
@@ -321,4 +390,6 @@ body {
 
 .btn-group-vertical {
   margin-top: 10px;
-}</style>
+  align-items: center;
+}
+</style>
