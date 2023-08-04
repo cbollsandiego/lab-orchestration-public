@@ -71,6 +71,12 @@ def user_list(current_user):
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
 
+@app.route('/lablist')
+@login_req('instructor')
+def lab_list(current_user):
+    labs = Labs.query.all()
+    json_labs = [lab.serialize() for lab in labs]
+    return jsonify(json_labs)
 
 @app.route('/createuser', methods=["POST"])
 @login_req('admin')
