@@ -1,6 +1,6 @@
 <template>
     <div class="group-info">
-      <h5 class="card-title">{{ name }} ({{ groupId }})</h5>
+      <h5 class="card-title">{{ name }}</h5>
       <ul class="list-unstyled">
         <li v-for="member in members" :key="member" class="small">{{ member }}</li>
       </ul>
