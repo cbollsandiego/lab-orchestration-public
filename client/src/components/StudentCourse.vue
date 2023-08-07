@@ -1,16 +1,27 @@
 <template>
-    <h1>{{this.name}}</h1>
-    <h3>{{this.instructor}}</h3>
-    <h4>Lab Sessions</h4>
-    <ul>
-        <router-link 
-            v-for="group in groups" 
-            :to="{name: 'Student_Lab', params: 
-            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: group.session, group: group.group}}" 
-            class="route-link">
-                <li>{{group.session}} - {{group.group}}</li>
-        </router-link>
-    </ul>
+    <div class="full-page">
+        <h1>{{this.name}}</h1>
+        <h3>{{this.instructor}}</h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Lab Sessions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="group in groups">
+                    <td>
+                        <router-link 
+                        :to="{name: 'Student_Lab', params: 
+                        {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: group.session, group: group.group}}"
+                        >
+                            {{group.session}} - {{group.group}}
+                        </router-link>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script>

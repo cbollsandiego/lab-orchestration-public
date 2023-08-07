@@ -1,11 +1,9 @@
 <template>
-    <div class="full-page">
-        <div v-if="currentUserRole === 'admin' || currentUserRole === 'instructor'">
-            <instructor-course></instructor-course>
-        </div>
-        <div v-if="currentUserRole === 'student' || currentUserRole === 'assistant'">
-            <student-course></student-course>
-        </div>
+    <div v-if="currentUserRole === 'admin' || currentUserRole === 'instructor'">
+        <instructor-course></instructor-course>
+    </div>
+    <div v-if="currentUserRole === 'student' || currentUserRole === 'assistant'">
+        <student-course></student-course>
     </div>
 </template>
 
