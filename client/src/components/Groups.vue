@@ -1,6 +1,12 @@
 <template>
     <div class="full-page">
       <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
+      <router-link 
+        :to="{name: 'Course', params: 
+        {course_name: this.$route.params.course_name, semester: this.$route.params.semester, section: this.$route.params.section}}" 
+        class="Course back-button">
+        <button type="button" class="btn btn-outline-secondary">Back to Course</button>
+    </router-link>
       <h1>Groups for {{this.$route.params.course_name}} {{this.$route.params.session}}</h1>
       <div class="import-wrapper">
         <div class="import-text">Import from past lab:</div>
@@ -254,4 +260,8 @@ export default{
     margin-bottom: 8px;
     font-weight: bold;
   }
+
+.back-button {
+    align-self: flex-start;
+}
 </style>
