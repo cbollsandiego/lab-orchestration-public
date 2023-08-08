@@ -15,6 +15,7 @@
                     :atCheckpoint="group.atCheckpoint"
                     :progress="group.progress"
                     :maxProgress="group.maxProgress"
+                    :clock="group.clock"
                     @instructorCommand="sendInstructorCommand"
                   />
                 </div>
@@ -49,9 +50,10 @@ export default {
                 data = res.data;
                 for(var i = 0; i < data.length; i++) {
                     data[i].score = 0;
+                    data[i].clock = false;
                 }
                 this.groups = data
-                this.calcScores()
+                this.sortGroups()
             })
             .catch((error) => {
                 console.log(error)
@@ -80,6 +82,7 @@ export default {
     },
     methods: {
         sortGroups() {
+            this.calcScores()
             this.groups.sort((a, b) => b.score - a.score || a.progress - b.progress)
         },
         calcScores() {
@@ -89,7 +92,6 @@ export default {
             group.atCheckpoint ? value+=1 :  value += 0;
             group.score = value;
           }
-          this.sortGroups();
         },
         sendInstructorCommand(command, groupName) {
             var group = this.groups.find(group => group.name == groupName)

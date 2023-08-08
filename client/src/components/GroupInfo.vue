@@ -1,6 +1,11 @@
 <template>
     <div class="group-info">
-      <h5 class="card-title">{{ name }}</h5>
+      <router-link 
+      :to="{name: 'Student_Lab', params: 
+      {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: $route.params.session, group: name}}"
+      >
+        <h5 class="card-title">{{ name }}</h5>
+      </router-link>
       <ul class="list-unstyled">
         <li v-for="member in members" :key="member" class="small">{{ member }}</li>
       </ul>
@@ -13,6 +18,11 @@
         <div v-show="atCheckpoint" class="image-wrapper">
           <div @click="checkOff">
             <img src="../assets/check.png" alt="At Checkpoint" class="image" />
+          </div>
+        </div>
+        <div v-show="clock" class="image-wrapper">
+          <div>
+            <img src="../assets/clock.png" alt="Clock" class="image" />
           </div>
         </div>
       </div>
@@ -38,7 +48,8 @@
       score: { type: Number },
       handRaised: { type: Boolean },
       atCheckpoint: { type: Boolean },
-      progress: { type: Number }
+      progress: { type: Number },
+      clock: { type: Boolean }
     },
     computed: {
       progressPercent() {
@@ -62,12 +73,6 @@
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
-  }
-  
-  .card-title {
-    color: #333333;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
   }
   
   ul.list-unstyled {

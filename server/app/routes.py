@@ -337,7 +337,11 @@ def lab_fetcher(course_name,semester,section_num,session):
         students = User.query.join(user_group).filter(user_group.c.group_id == group.id).all()
         for student in students:
             student_names.append(student.name)
-        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
+        qs = Student_lab.query.filter_by (group_name=group.group_name, session_id=session_id).all()
+        latest_time = datetime.min
+        for q in qs:
+            if q.submit_time > latest_time: latest_time = q.submit_time 
+        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress, 'latestTime': latest_time})
     return dict
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_name>",methods=['GET', 'POST'])
