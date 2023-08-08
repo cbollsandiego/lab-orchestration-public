@@ -118,9 +118,18 @@
     border-radius: 3px;
   }
   
-  .add-question,
   .add-user,
-  .create-lab-button {
+  .create-lab-button,
+  .create-user-button,
+  .create-course-button,
+  .new-button,
+  .import-button,
+  .save-button,
+  .add-from-name,
+  .create-session,
+  .save-lab-button,
+  .quit-button
+   {
     background-color: #4caf50;
     color: #fff;
     border: none;
@@ -128,7 +137,18 @@
     cursor: pointer;
     border-radius: 5px;
   }
-  
+  .add-question
+  {
+    background-color: #2d3ebf;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+
+
   .add-question {
     margin-bottom: 10px;
   }
@@ -149,22 +169,6 @@
   .btn-group-vertical {
     margin-top: 10px;
   }
-  .create-course-button {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  .create-user-button {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-}
 
   .input-text-box {
     padding: 10px;
@@ -214,17 +218,6 @@
     font-size: 1.2rem;
   }
   
-  .new-button,
-.import-button,
-.save-button  {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-
 .remove-button {
     background-color: #ff0000;
     color: #fff;
@@ -302,16 +295,6 @@
   }
   .remove-student {
     background-color: #ff0000;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.add-from-name,
-.create-session {
-    background-color: #4caf50;
     color: #fff;
     border: none;
     padding: 10px 20px;

@@ -10,7 +10,7 @@
                 <label for="loginEmail" class="form-label">Email:</label>
                 <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email" @keyup.enter="handleLoginSubmit">
                 <label for="loginPass" class="form-label">Password:</label>
-                <input type="text" class="form-control" id="loginPass" v-model="loginForm.pass"
+                <input type="password" class="form-control" id="loginPass" v-model="loginForm.pass"
                     placeholder="Enter Password" @keyup.enter="handleLoginSubmit">
             </div>
             <div>

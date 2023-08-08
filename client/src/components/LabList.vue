@@ -1,5 +1,6 @@
 <template>
     <div class="full-page">
+        <div class="container">
         <router-link :to="{ name: 'Lab Create' }" class="route-link">
             <button class="create-lab-button">
                 <a class="nav-link">New Lab</a>
@@ -21,6 +22,7 @@
                 </tr>
             </tbody>
         </table>
+    </div>
     </div>
 </template>
 
