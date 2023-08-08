@@ -44,17 +44,13 @@
         <button @click="removeQuestion(question.order_num)" class="delete-question">Delete</button>
       </div>
     </div>
-
     <button type="button" class="add-question" @click="newQuestion">Add Question
       <b>+</b></button>
-    <!--<alert :message="message" :isSuccess="alertSuccess" v-if="(newQuestion) == click && showMessage" @click="showMessage = false">
-                </alert>-->
     <div class="save-container">
       <button @click="saveLab" class="save-lab-button">Save</button>
       <button @click="saveAndQuit" class="quit-button">Save & Quit</button>
     </div>
-    <button @click="deleteLab" class="btn btn-danger btn-sm my-2"> Delete Lab</button>
-    
+    <button @click="deleteLab" v-if="this.$route.params.labName" class="btn btn-danger btn-sm my-2"> Delete Lab</button>
   </div>
 </template>
 
@@ -70,8 +66,6 @@ export default {
       alertMessage: "",
       alertSuccess: false,
       click: '',
-      //alertSuccess: true,
-      //showMessage: false,
     };
   },
   components: {
@@ -126,8 +120,7 @@ export default {
         answer: this.questionForm,
 
       };
-      this.addAnswer(payload);
-
+      //this.addAnswer(payload);
     },
     /*addAnswer(payload) {
       const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
@@ -146,10 +139,21 @@ export default {
           //this.showMessage = true;
         });
 
-        },
-        deleteLab(){
-
-        },*/
+    },*/
+    deleteLab() {
+      this.removeLab();
+    },
+    removeLab() {
+      const path = `http://localhost:5001/newlab/delete/${this.$route.params.labName}`;
+      const accessToken = localStorage.getItem('token')
+      axios.delete(path, {headers: {'Authorization': accessToken}})
+        .then(() => {
+          this.$router.push({ name: 'Lab List'})
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     saveLab() {
         if(!this.$route.params.labName) {
             this.submitNewLab()
@@ -223,8 +227,8 @@ export default {
                 console.log(error)
             })
     }
-  },
-};
+  }
+}
 </script>
 
 <style>

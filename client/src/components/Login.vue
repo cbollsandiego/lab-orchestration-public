@@ -67,8 +67,7 @@
                 this.loginForm.pass = '';
             },
         },
-    },
-};
+    }
 </script>
 <style scoped >
 

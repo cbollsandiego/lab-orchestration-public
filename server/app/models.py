@@ -109,7 +109,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_name = db.Column(db.String(100))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
-    session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
+    session_id = db.Column(db.Integer, db.ForeignKey('session.id', ondelete='CASCADE'))
     hand_raised = db.Column(db.Boolean, default=False)
     at_checkpoint = db.Column(db.Boolean, default=False)
     progress = db.Column(db.Integer, default=0)
@@ -140,13 +140,13 @@ class Student_lab (db.Model):
    answer_id=db.Column(db.Integer, primary_key=True)
    question_num=db.Column(db.Integer)
    group_name=db.Column(db.String)
-   session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
+   session_id = db.Column(db.Integer, db.ForeignKey('session.id', ondelete='CASCADE'))
    submit_time =db.Column(db.TIMESTAMP)
    saved_answer=db.Column(db.String)
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    lab_id = db.Column(db.Integer, db.ForeignKey('labs.lab_id'))
+    lab_id = db.Column(db.Integer, db.ForeignKey('labs.lab_id', ondelete='CASCADE'))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     name = db.Column(db.String)
 

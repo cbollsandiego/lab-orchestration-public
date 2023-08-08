@@ -483,15 +483,13 @@ def newLab():
     return {'status': 'success'}
 
 @app.route('/newlab/delete/<lab_name>', methods=['DELETE'])
-def deleteLab(lab_name):
+@login_req('instructor')
+def deleteLab(current_user, lab_name):
     data={'status': 'success'}
     if request.method == 'DELETE':
-        print("Lab has deleted")
         lab = Labs.query.filter_by(title=lab_name).first()
-        print(lab)
         db.session.delete(lab)
         db.session.commit()
-        data['message'] = 'Lab deleted!'
     return jsonify(data)
     
 
