@@ -35,9 +35,9 @@
                         Checkpoint 
                     </h5>
                 
-                    <input class="" type="radio" value="Yes" @click="sendCommand('')" name="Si" id="yes"
+                    <input class="" type="radio" value="Yes" @click="sendCommand('checkon')" name="Si" id="yes"
                         checked="checked">Yes <br>
-                    <input class="" type="radio" value="No" @click="sendCommand('')" name="Si" id="no"
+                    <input class="" type="radio" value="No" @click="sendCommand('checkoff')" name="Si" id="no"
                         checked="checked">No<br>
 
 
@@ -97,7 +97,7 @@ export default {
                 });
         },
         sendCommand(command) {
-            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.group, command);
+            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.session, this.$route.params.group, command);
 
         },
         addAnswer(payload) {
@@ -154,6 +154,12 @@ export default {
         this.socket = io("127.0.0.1:5001");
         const roomName = this.$route.params.course_name + ' ' + this.$route.params.session;
         this.socket.emit("enter_room", roomName);
+        const command_name = 'instructor_command_' + this.$route.params.group
+        this.socket.on(command_name, (command) => {
+            if(command === 'handoff') {
+                this.handup = false
+            }
+        })
     },
 
 }

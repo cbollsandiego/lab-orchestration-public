@@ -1,77 +1,92 @@
 <template>
-    <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
-    <h1>{{ this.name }}</h1>
-    <h3>{{ this.instructor }}</h3>
-    <h4>Lab Sessions</h4>
-    <ul>
-        <li v-for="session in sessions">
-            <router-link 
-            :to="{name: 'Live Session', params: 
-            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name}}" 
-            class="route-link">
-                {{session.name}} - {{session.lab_name}}
-            </router-link>
-            ||
-            <router-link 
-            :to="{name: 'Create Groups', params:
-            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }}"   
-            class="route-link">
-             (Edit Groups)
-            </router-link>
-        </li>
-</ul>
- <div class="add-session-wrapper">
-        <div class="input-text-box">
-            <label>Add lab session:</label>
-            <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
-        </div>
-        <select v-model="newSessionLab">
-            <option disabled value="">Choose Lab Template</option>
-            <option v-for="lab in labs">{{ lab.title }}</option>
-        </select>
-        <button @click="addSession" class="create-session">Create Session</button>
-    </div>
-    <br>
-    <br>
-    <h4>Members</h4>
-    <div class="add-remove-wrapper">
-        <div class="add-remove-element">
-            <div class="custom-file">
-                <label>Add Students From .csv File:</label>
-                <input type="file" class="custom-file-input" id="customFile" @change="addFromFile($event)">
-            </div>
-            <br>
-            <div class="input-text-box">
-                <label>Add student by name:</label>
-                <input type="text" v-model="newMemberName" class="form-control" placeholder="New Student Name">
-            </div>
-            <button @click="addFromName" class="add-from-name">Add Student</button>
-        </div>
-        <div class="add-remove-element remove-border">
-            <label>Remove student:</label>
-            <select v-model="memberToRemove" class="form-select">
-                <option disabled value="">Select student to remove</option>
-                <option v-for="member in members">{{ member.name }}</option>
-            </select>
-            <button @click="removeStudent(memberToRemove)" class="remove-student">Remove Student</button>
-        </div>
-    </div>
-    <div class="table-wrapper">
-        <h5>Member List</h5>
-        <table class="table table-striped table-bordered table-sm">
+    <div class="full-page">
+        <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
+        <h1>{{ this.name }}</h1>
+        <h3>{{ this.instructor }}</h3>
+        <h4>Lab Sessions</h4>
+        <table class="table table-striped table-bordered session-table">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Email</th>
+                    <th>Lab Sessions</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="member in members">
-                    <td>{{ member.name }}</td>
-                    <td>{{ member.email }}</td>
+                <tr v-for="session in sessions">
+                    <td>
+                        <router-link 
+                        :to="{name: 'Live Session', params: 
+                        {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name}}" 
+                        class="route-link">
+                            {{session.name}} - {{session.lab_name}}
+                        </router-link>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-warning btn-sm">
+                            <router-link 
+                            :to="{name: 'Create Groups', params:
+                            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }}"   
+                            class="route-link">
+                            Edit Groups
+                            </router-link>
+                        </button>
+                    </td>
                 </tr>
             </tbody>
         </table>
+    <div class="add-session-wrapper">
+            <div class="input-text-box">
+                <label>Add lab session:</label>
+                <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
+            </div>
+            <select v-model="newSessionLab">
+                <option disabled value="">Choose Lab Template</option>
+                <option v-for="lab in labs">{{ lab.title }}</option>
+            </select>
+            <button @click="addSession" class="create-session">Create Session</button>
+        </div>
+        <br>
+        <br>
+        <h4>Members</h4>
+        <div class="add-remove-wrapper">
+            <div class="add-remove-element">
+                <div class="custom-file">
+                    <label>Add Students From .csv File:</label>
+                    <input type="file" class="custom-file-input" id="customFile" @change="addFromFile($event)">
+                </div>
+                <br>
+                <div class="input-text-box">
+                    <label>Add student by name:</label>
+                    <input type="text" v-model="newMemberName" class="form-control" placeholder="New Student Name">
+                </div>
+                <button @click="addFromName" class="add-from-name">Add Student</button>
+            </div>
+            <div class="add-remove-element remove-border">
+                <label>Remove student:</label>
+                <select v-model="memberToRemove" class="form-select">
+                    <option disabled value="">Select student to remove</option>
+                    <option v-for="member in members">{{ member.name }}</option>
+                </select>
+                <button @click="removeStudent(memberToRemove)" class="remove-student">Remove Student</button>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <h5>Member List</h5>
+            <table class="table table-striped table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="member in members">
+                        <td>{{ member.name }}</td>
+                        <td>{{ member.email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>  
     </div>
 </template>
 
