@@ -1,23 +1,24 @@
 <template>
-    <div> 
-        <div v-if="message!=''">
+    <div>
+        <div v-if="message != ''">
             <alert :message="message"></alert>
         </div>
-      <form>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        <form>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
                 integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-        <div class="mb-3">
-            <label for="loginEmail" class="form-label">Email:</label>
-            <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email" @keyup.enter="handleLoginSubmit">
-            <label for="loginPass" class="form-label">Password:</label>
-            <input type="password" class="form-control" id="loginPass" v-model="loginForm.pass" placeholder="Enter Password" @keyup.enter="handleLoginSubmit">
-        </div>
-        <div>
-            <button type="button" class="btn btn-outline-success" @click="handleLoginSubmit">Login</button>
-        </div>
-      </form>
+            <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email:</label>
+                <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email" @keyup.enter="handleLoginSubmit">
+                <label for="loginPass" class="form-label">Password:</label>
+                <input type="text" class="form-control" id="loginPass" v-model="loginForm.pass"
+                    placeholder="Enter Password" @keyup.enter="handleLoginSubmit">
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-success" @click="handleLoginSubmit">Login</button>
+            </div>
+        </form>
     </div>
-  </template>
+</template>
 
 <script>
     import axios from 'axios';
@@ -66,9 +67,9 @@
                 this.loginForm.pass = '';
             },
         },
-    };
+    },
+};
 </script>
-
 <style scoped >
 
 html, body {

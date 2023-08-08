@@ -470,7 +470,7 @@ def newLab():
     into the database.
     '''
     data = request.get_json()
-    l = Labs.query.filter_by(title=data.get('title')).first()
+    l = Labs.query.filter_by(title=data.get('title')).first() 
     if l is not None or data.get('title') is None or data.get('questions') is None:
         return {'status': 'name exists'}
     lab = Labs(title=data.get('title'), questions=json.dumps(data.get('questions')), num_questions=int(data.get('num_questions')))
@@ -481,6 +481,19 @@ def newLab():
     except Exception as e: 
         return {'status': 'failure'}
     return {'status': 'success'}
+
+@app.route('/newlab/delete/<lab_name>', methods=['DELETE'])
+def deleteLab(lab_name):
+    data={'status': 'success'}
+    if request.method == 'DELETE':
+        print("Lab has deleted")
+        lab = Labs.query.filter_by(title=lab_name).first()
+        print(lab)
+        db.session.delete(lab)
+        db.session.commit()
+        data['message'] = 'Lab deleted!'
+    return jsonify(data)
+    
 
 @app.route('/editlab/<lab_name>/get')
 @login_req('instructor')
