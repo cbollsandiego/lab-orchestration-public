@@ -45,7 +45,8 @@
     width: 800px;
   }
   
-  .input-container {
+  .input-container,
+  .question-content {
     display: flex;
     align-items: center;
     width: 100%;
@@ -67,20 +68,6 @@
     flex-direction: column;
     align-items: flex-start;
     width: 800px;
-  }
-  
-  .question-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    
-  }
-  
-  .question-order {
-    flex-basis: 50px;
-    font-weight: bold;
-    font-size: 20px;
-    margin-top: 34px;
   }
   
   .question-textarea-container {
@@ -133,7 +120,7 @@
     background-color: #4caf50;
     color: #fff;
     border: none;
-    padding: 10px 20px;
+    padding: 5px 15px;
     cursor: pointer;
     border-radius: 5px;
   }
@@ -142,14 +129,15 @@
     background-color: #2d3ebf;
     color: #fff;
     border: none;
-    padding: 10px 20px;
+    padding: 5px 13px;
     cursor: pointer;
     border-radius: 5px;
   }
-
-
-
-  .add-question {
+ 
+  .add-question,
+  ul.list-unstyled,
+  .name-input,
+  .row-cols-1 > .col {
     margin-bottom: 10px;
   }
   
@@ -170,7 +158,8 @@
     margin-top: 10px;
   }
 
-  .input-text-box {
+  .input-text-box,
+  .text {
     padding: 10px;
     width: 740px;
   }
@@ -188,9 +177,6 @@
   .card-title,
   .small {
     color: #555555;
-  }
-  ul.list-unstyled {
-    margin-bottom: 10px;
   }
   
   .small {
@@ -240,10 +226,6 @@
     border-radius: 5px;
   }
 
-.name-input {
-    margin-bottom: 10px;
-}
-
 .list-group-item {
     cursor: grab;
   }
@@ -290,9 +272,6 @@
     padding: 10px;
   }
   
-  .row-cols-1 > .col {
-    margin-bottom: 10px;
-  }
   .remove-student {
     background-color: #ff0000;
     color: #fff;
@@ -351,10 +330,6 @@
     padding: 20px;
 }
 
-.text {
-    padding: 10px;
-    width: 740px;
-}
 .route-link {
     text-decoration: none;
   }
