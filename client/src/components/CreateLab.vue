@@ -19,7 +19,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up"
                 viewBox="0 0 16 16">
                 <path fill-rule="evenodd"
-                d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
+                  d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
               </svg>
             </button>
             <button @click="moveDown(question.order_num)" class="btn btn-default">
@@ -48,9 +48,11 @@
       <b>+</b></button>
     <!--<alert :message="message" :isSuccess="alertSuccess" v-if="(newQuestion) == click && showMessage" @click="showMessage = false">
                 </alert>-->
-    <button @click="submitNewLab" class="create-lab-button">Create Lab</button>
-    <button @click="deleteLab" class="btn btn-danger btn-sm my-2"> Delete Lab</button>
-    
+    <button @click="submitNewLab" class="create-lab-button">Save and Submit</button>
+    <button type="button" class="btn btn-danger btn" @click="deleteLab(lab)">Delete Lab</button>
+    <button @click="saveLab" class="button">Save </button>
+
+
   </div>
 </template>
 
@@ -131,40 +133,55 @@ export default {
 
           console.log(error);
           this.newQuestion();
-          
+
           //this.alertSuccess = false;
           //this.message='Error occurred when saving messsage'
-          // this.showMessage = true;
+          //this.showMessage = true;
         });
 
-        },
-        deleteLab(){
+    },
+    deleteLab() {
+      this.removeLab();
+    },
+    removeLab() {
+      const path = `http://localhost:5001/newlab/delete/${this.$route.params.lab_name}`;
 
-        },
-    submitNewLab() {
-      const newLab = { title: this.title.trim(), questions: this.questions, num_questions: this.questions.length };
-      const path = 'http://localhost:5001/newlab/submit'
-      axios.post(path, newLab)
-        .then((response) => {
-          if (response.data.status === 'failure') {
-            this.alertMessage = "Failure creating lab. Something went wrong."
-            this.alertSuccess = false
-          }
-          else if (response.data.status == "name exists") {
-            this.alertMessage = "Failure creating lab. Make sure the lab name is unique and no questions are blank."
-            this.alertSuccess = false
-          }
-          else {
-            this.alertMessage = 'Lab successfully created!'
-            this.alertSuccess = true
-            this.questions = [{ order_num: 1, title: "", type: "Question", checkpoint: false }]
-            this.title = ""
-          }
+      axios.delete(path)
+        .then(() => {
+          this.questions();
+          this.message = 'Lab deleted!';
+          this.showMessage = true;
         })
         .catch((error) => {
-          console.log(error)
-        })
-    }
+          console.error(error);
+          
+        });
+    },
+// the lab says that it has been deleted in the terminal however on the page the content is still there 
+  },
+  submitNewLab() {
+    const newLab = { title: this.title.trim(), questions: this.questions, num_questions: this.questions.length };
+    const path = 'http://localhost:5001/newlab/submit'
+    axios.post(path, newLab)
+      .then((response) => {
+        if (response.data.status === 'failure') {
+          this.alertMessage = "Failure creating lab. Something went wrong."
+          this.alertSuccess = false
+        }
+        else if (response.data.status == "name exists") {
+          this.alertMessage = "Failure creating lab. Make sure the lab name is unique and no questions are blank."
+          this.alertSuccess = false
+        }
+        else {
+          this.alertMessage = 'Lab successfully created!'
+          this.alertSuccess = true
+          this.questions = [{ order_num: 1, title: "", type: "Question", checkpoint: false }]
+          this.title = ""
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   },
 };
 </script>
@@ -321,4 +338,5 @@ body {
 
 .btn-group-vertical {
   margin-top: 10px;
-}</style>
+}
+</style>

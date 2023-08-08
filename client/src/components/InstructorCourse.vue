@@ -4,23 +4,26 @@
     <h3>{{ this.instructor }}</h3>
     <h4>Lab Sessions</h4>
 
-   <li  v-for="session in sessions">
-   
-    <router-link 
-     :to="{name: 'Live Session', params: 
-            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name}}" 
-            class="route-link">
-                {{session.name}} - {{session.lab_name}}
-        </router-link>
+    <li v-for="session in sessions">
 
-    <router-link 
-     :to="{name: 'Create Groups', params:
-            { course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }
-    }"   class="route-link">
-             (Create Groups)
-    </router-link>
-</li>
- <div class="add-session-wrapper">
+        <router-link
+            :to="{
+                name: 'Live Session', params:
+                    { course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }
+            }"
+            class="route-link">
+            {{ session.name }} - {{ session.lab_name }}
+        </router-link> <br>
+        <button>
+            <router-link :to="{
+                name: 'Create Groups', params:
+                    { course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }
+            }" class="route-link">
+                Create Groups
+            </router-link>
+        </button>
+    </li>
+    <div class="add-session-wrapper">
         <div class="input-text-box">
             <label>Add lab session:</label>
             <input type="text" v-model="newSessionName" class="form-control" placeholder="New Session Name">
