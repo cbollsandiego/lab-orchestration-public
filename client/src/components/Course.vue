@@ -36,13 +36,3 @@ export default {
 }
 </script>
 
-<style>
-.full-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-</style>

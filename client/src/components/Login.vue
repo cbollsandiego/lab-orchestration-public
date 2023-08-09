@@ -10,7 +10,7 @@
                 <label for="loginEmail" class="form-label">Email:</label>
                 <input type="text" class="form-control" id="loginEmail" v-model="loginForm.email" placeholder="Enter Email" @keyup.enter="handleLoginSubmit">
                 <label for="loginPass" class="form-label">Password:</label>
-                <input type="text" class="form-control" id="loginPass" v-model="loginForm.pass"
+                <input type="password" class="form-control" id="loginPass" v-model="loginForm.pass"
                     placeholder="Enter Password" @keyup.enter="handleLoginSubmit">
             </div>
             <div>
@@ -69,28 +69,3 @@
         },
     }
 </script>
-<style scoped >
-
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .lab-header{
-    background-color: #f2f2f2;
-  }
-  
-  .mb-3 {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-
-  .text {
-    padding: 10px;
-    width: 740px;
-  }
-</style>

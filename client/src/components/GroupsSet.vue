@@ -110,23 +110,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-.container {
-  background-color: #f8f9fa;
-  border-radius: 10px;
-}
-
-.card {
-  background-color: #f0f0f0;
-  margin-bottom: 10px;
-}
-
-.card-body {
-  padding: 10px;
-}
-
-.row-cols-1 > .col {
-  margin-bottom: 10px;
-}
-</style>

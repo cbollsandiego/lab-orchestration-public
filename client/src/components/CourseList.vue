@@ -1,17 +1,15 @@
 <template>
     <div class="full-page">
     <div class="container">
-        <table class="table table-striped table-bordered">
-            <thead>
-
-                <router-link :to="{ name: 'Create Course' }" class="route-link">
-                    <button>
+        <router-link :to="{ name: 'Create Course' }" class="route-link">
+                    <button class="create-course-button">
                         <a class="nav-link"> Create Course</a>
                     </button>
                 </router-link>
+        <table class="table table-striped table-bordered">
+            <thead>
+
                 
-
-
 
                 <tr>
                     <th>Id</th>
@@ -73,14 +71,3 @@ export default {
     }
 }
 </script>
-
-<style>
-.full-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-</style>
