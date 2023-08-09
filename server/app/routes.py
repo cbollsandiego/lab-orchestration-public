@@ -338,7 +338,7 @@ def lab_fetcher(course_name,semester,section_num,session):
         for student in students:
             student_names.append(student.name)
         qs = Student_lab.query.filter_by (group_name=group.group_name, session_id=session_id).all()
-        latest_time = datetime.min
+        latest_time = datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
         for q in qs:
             if q.submit_time > latest_time: latest_time = q.submit_time
         latest_time = latest_time.strftime("%H:%M:%S")
