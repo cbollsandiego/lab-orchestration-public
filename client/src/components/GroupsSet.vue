@@ -53,6 +53,9 @@ export default {
                     data[i].clock = false;
                 }
                 this.groups = data
+                const time = new Date()
+                console.log(time)
+                console.log(this.groups[2].latestTime)
                 this.sortGroups()
             })
             .catch((error) => {

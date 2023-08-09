@@ -340,7 +340,8 @@ def lab_fetcher(course_name,semester,section_num,session):
         qs = Student_lab.query.filter_by (group_name=group.group_name, session_id=session_id).all()
         latest_time = datetime.min
         for q in qs:
-            if q.submit_time > latest_time: latest_time = q.submit_time 
+            if q.submit_time > latest_time: latest_time = q.submit_time
+        latest_time = latest_time.strftime("%H:%M:%S")
         dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress, 'latestTime': latest_time})
     return dict
 
