@@ -346,7 +346,8 @@ def lab_fetcher(course_name,semester,section_num,session):
     return dict
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_name>",methods=['GET', 'POST'])
-def student_view(course_name,session_name,group_name,semester,section_num):
+@login_req()
+def student_view(current_user, course_name,session_name,group_name,semester,section_num):
     '''
     This is used to get all the information for a student about a lab.
     It retrieves all information about the lab questions and their saved respones, and returns it all.
@@ -363,6 +364,11 @@ def student_view(course_name,session_name,group_name,semester,section_num):
     session=Session.query.filter_by(course_id=course_id,name= session_name).first_or_404()
     lab_id=session.lab_id
     session_id=session.id
+    group = Group.query.filter_by(group_name=group_name,session_id=session_id).first()
+    students = User.query.join(user_group).filter(user_group.c.group_id==group.id).all()
+    if current_user.role != 'admin' and current_user.role != 'instructor':
+        if current_user not in students:
+            return {'status': 'failure'}, 401
     lab=Labs.query.filter_by (lab_id=lab_id).first_or_404()
     f=lab.questions
     raw_results = json.loads(f) 

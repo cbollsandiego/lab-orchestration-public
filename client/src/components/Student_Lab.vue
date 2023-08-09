@@ -83,7 +83,8 @@ export default {
     methods: {
         getQuestions() {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
-            axios.get(path)
+            let accessToken = localStorage.getItem('token')
+            axios.get(path, {headers:{'Authorization': accessToken}})
                 .then((res) => {
                     this.questions = res.data.questions;
                     this.questionForm.answer = res.data.answers;
@@ -92,8 +93,8 @@ export default {
 
                 })
                 .catch((error) => {
-                    console.log("error");
                     console.error(error);
+                    this.$router.push({ name: 'Login'});
                 });
         },
         sendCommand(command) {
@@ -102,7 +103,8 @@ export default {
         },
         addAnswer(payload) {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
-            axios.post(path, payload)
+            let accessToken = localStorage.getItem('token')
+            axios.post(path, payload, {headers:{'Authorization': accessToken}})
                 .then(() => {
                     this.getQuestions();
                     this.message = 'Answer saved';
@@ -126,9 +128,10 @@ export default {
 
             };
             console.log(this.questionForm.answer);
+            let accessToken = localStorage.getItem('token')
             const payload = {
                 answer: this.questionForm.answer,
-                id: this.questionForm.id,
+                id: this.questionForm.id
             };
             this.addAnswer(payload);
 
