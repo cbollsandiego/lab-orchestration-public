@@ -26,7 +26,7 @@
                         </button>
                     </td>
                     <td>
-                        <button type="button" class="btn add-question btn-sm" @click="toggleEditUserModal(user)">
+                        <button type="button" class="update-button" @click="toggleEditUserModal(user)">
                             Update
                         </button>
                     </td>

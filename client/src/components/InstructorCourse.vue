@@ -22,14 +22,12 @@
                         </router-link>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-warning btn-sm">
-                            <router-link 
-                            :to="{name: 'Create Groups', params:
-                            {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }}"   
-                            class="route-link">
-                            Edit Groups
-                            </router-link>
-                        </button>
+                        <router-link 
+                        :to="{name: 'Create Groups', params:
+                        {course_name: $route.params.course_name, semester: $route.params.semester, section: $route.params.section, session: session.name }}"   
+                        class="route-link">
+                            <button type="button" class="add-question">Edit Groups</button>
+                        </router-link>
                     </td>
                 </tr>
             </tbody>
@@ -252,4 +250,3 @@ export default {
     }
 }
 </script>
-

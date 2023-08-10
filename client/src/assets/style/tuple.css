@@ -133,6 +133,16 @@
     cursor: pointer;
     border-radius: 5px;
   }
+
+  .update-button {
+    background-color: #2d3ebf;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+  }
  
   .add-question,
   ul.list-unstyled,
