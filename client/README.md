@@ -1,29 +1,58 @@
-# client
+# Lab-Orchestration
 
-This template should help get you started developing with Vue 3 in Vite.
+_USD Lab Orchestration Site_
 
-## Recommended IDE Setup
+## Features
+* Vue-JS frontend and Flask backend
+* SQLAlchemy database of lab assignments, courses, and users
+* Group creation and collaboration on assignments
+* Different user permission levels
+* Live feedback for professors and students during in-person lab sessions
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## Run on local server
+1. Clone the repository
 
-## Customize configuration
+2. Create virtual environment
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+    ```sh
+    $ cd server
+    $ python3 -m venv env
+    $ source env/bin/activate
+    (env)$ pip install -r requirements.txt
+    ```
 
-## Project Setup
+3. Initialize database 
 
-```sh
-npm install
-```
+    ```sh
+    (env)$ flask db upgrade
+    ```
 
-### Compile and Hot-Reload for Development
+4. Create an admin user with your information
 
-```sh
-npm run dev
-```
+    ```sh
+    (env)$ flask shell
+    >>> from app import app, db
+    >>> user = User('YOUR_NAME', 'YOUR_EMAIL', 'admin', 'YOUR_PASSWORD')
+    >>> db.session.add(user)
+    >>> db.session.commit()
+    >>> exit()
+    ```
 
-### Compile and Minify for Production
+5. Run the flask server
 
-```sh
-npm run build
-```
+    ```sh
+    (env)$ flask run --port=5001 --debug
+    ```
+
+6. Create a new terminal window and run Vue-JS app
+
+    ```sh
+    $ cd client
+    $ npm install
+    $ npm run dev
+    ```
+
+7. Navigate to the website in your browser of choice
+    [http://localhost:5173/login](http://localhost:5173/login)
+
+8. Login with the user you created
