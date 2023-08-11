@@ -1,6 +1,12 @@
 <template>
     <div class="full-page">
       <alert :message="alertMessage" :isSuccess="alertSuccess"></alert>
+      <router-link 
+        :to="{name: 'Course', params: 
+        {course_name: this.$route.params.course_name, semester: this.$route.params.semester, section: this.$route.params.section}}" 
+        class="Course back-button">
+        <button type="button" class="btn btn-outline-secondary">Back to Course</button>
+    </router-link>
       <h1>Groups for {{this.$route.params.course_name}} {{this.$route.params.session}}</h1>
       <div class="import-wrapper">
         <div class="import-text">Import from past lab:</div>
@@ -44,6 +50,7 @@
 
 <script>
 import axios from 'axios';
+import { getTransitionRawChildren } from 'vue';
 import draggable from 'vuedraggable'
 import Alert from './Alert.vue'
 export default{
@@ -96,10 +103,12 @@ export default{
                 this.groups = res.data.groups
                 this.alertMessage = "Imported Successfully."
                 this.alertSuccess = true
+                this.postGroups()
             })
             .catch((error) => {
                 console.log(error)
             })
+            this.$router.go(0)
         },
         async postGroups() {
             this.checkNames()
@@ -120,21 +129,27 @@ export default{
         },
         newGroup() {
             this.groups.push({name: '', members: []})
+            this.checkNames()
         },
         checkNames() {
+            let i = 1
             for(let group of this.groups) {
-                if(group.name === '') {
-                    group.name = 'group'
+                if(group.name === '' || group.name.slice(0,5) === 'Group') {
+                    group.name = 'Group' + ` ${i}`
+                    i++
                 }
-                let i = 1
-                while(this.groups.filter(x => x.name === group.name).length > 1) {
+            }
+            i = 1
+            for(let group of this.groups) {
+                while(this.groups.filter(x =>x.name === group.name).length > 1) {
                     group.name = group.name + ` ${i}`
+                    i++
                 }
             }
         },
         removeGroup(groupName) {
             let g = this.groups.find(group => group.name === groupName)
-            for(let i =0; i < g.members.length; i++) {
+            for(let i = 0; i < g.members.length; i++) {
                 this.notInGroup.push(g.members[i])
             }
             this.groups = this.groups.filter(group => group.name != groupName)
@@ -165,84 +180,3 @@ export default{
 }
 
 </script>
-
-<style>
-.full-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-
-.new-button,
-.import-button,
-.save-button  {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-
-.remove-button {
-    background-color: #ff0000;
-    color: #fff;
-    border: none;
-    padding: 6px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 6px;
-}
-.group-box {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-.group {
-    margin: 10px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-  }
-
-.name-input {
-    margin-bottom: 10px;
-}
-
-.list-group-item {
-    cursor: grab;
-  }
-
-.buttons-wrapper {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 10px; 
-  }
-
-.import-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 10px;
-    height: 100px;
-    border: 2px solid #4caf50;
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-.import-controls {
-    display: flex;
-    gap: 10px;
-    height: 40px;
-  }
-
-.import-text {
-    margin-bottom: 8px;
-    font-weight: bold;
-  }
-</style>

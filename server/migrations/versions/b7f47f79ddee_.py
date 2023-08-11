@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4bc88ef5940c
+Revision ID: b7f47f79ddee
 Revises: 
-Create Date: 2023-08-02 10:59:33.794199
+Create Date: 2023-08-08 15:33:16.508649
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4bc88ef5940c'
+revision = 'b7f47f79ddee'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -59,7 +59,7 @@ def upgrade():
     sa.Column('course_id', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
-    sa.ForeignKeyConstraint(['lab_id'], ['labs.lab_id'], ),
+    sa.ForeignKeyConstraint(['lab_id'], ['labs.lab_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_course',
@@ -78,7 +78,7 @@ def upgrade():
     sa.Column('progress', sa.Integer(), nullable=True),
     sa.Column('max_progress', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['course_id'], ['course.id'], ),
-    sa.ForeignKeyConstraint(['session_id'], ['session.id'], ),
+    sa.ForeignKeyConstraint(['session_id'], ['session.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('student_answers',
@@ -88,7 +88,7 @@ def upgrade():
     sa.Column('session_id', sa.Integer(), nullable=True),
     sa.Column('submit_time', sa.TIMESTAMP(), nullable=True),
     sa.Column('saved_answer', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['session_id'], ['session.id'], ),
+    sa.ForeignKeyConstraint(['session_id'], ['session.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('answer_id')
     )
     op.create_table('user_group',

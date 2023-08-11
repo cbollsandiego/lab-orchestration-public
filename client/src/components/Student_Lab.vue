@@ -35,9 +35,9 @@
                         Checkpoint 
                     </h5>
                 
-                    <input class="" type="radio" value="Yes" @click="sendCommand('')" name="Si" id="yes"
+                    <input class="" type="radio" value="Yes" @click="sendCommand('checkon')" name="Si" id="yes"
                         checked="checked">Yes <br>
-                    <input class="" type="radio" value="No" @click="sendCommand('')" name="Si" id="no"
+                    <input class="" type="radio" value="No" @click="sendCommand('checkoff')" name="Si" id="no"
                         checked="checked">No<br>
 
 
@@ -83,7 +83,8 @@ export default {
     methods: {
         getQuestions() {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
-            axios.get(path)
+            let accessToken = localStorage.getItem('token')
+            axios.get(path, {headers:{'Authorization': accessToken}})
                 .then((res) => {
                     this.questions = res.data.questions;
                     this.questionForm.answer = res.data.answers;
@@ -92,17 +93,18 @@ export default {
 
                 })
                 .catch((error) => {
-                    console.log("error");
                     console.error(error);
+                    this.$router.push({ name: 'Login'});
                 });
         },
         sendCommand(command) {
-            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.group, command);
+            this.socket.emit('command_send', this.$route.params.course_name, this.$route.params.session, this.$route.params.group, command);
 
         },
         addAnswer(payload) {
             const path = `http://localhost:5001/${this.$route.params.course_name}/${this.$route.params.semester}/${this.$route.params.section}/${this.$route.params.session}/${this.$route.params.group}`;
-            axios.post(path, payload)
+            let accessToken = localStorage.getItem('token')
+            axios.post(path, payload, {headers:{'Authorization': accessToken}})
                 .then(() => {
                     this.getQuestions();
                     this.message = 'Answer saved';
@@ -126,9 +128,10 @@ export default {
 
             };
             console.log(this.questionForm.answer);
+            let accessToken = localStorage.getItem('token')
             const payload = {
                 answer: this.questionForm.answer,
-                id: this.questionForm.id,
+                id: this.questionForm.id
             };
             this.addAnswer(payload);
 
@@ -154,43 +157,17 @@ export default {
         this.socket = io("127.0.0.1:5001");
         const roomName = this.$route.params.course_name + ' ' + this.$route.params.session;
         this.socket.emit("enter_room", roomName);
+        const command_name = 'instructor_command_' + this.$route.params.group
+        this.socket.on(command_name, (command) => {
+            if(command === 'handoff') {
+                this.handup = false
+            }
+        })
     },
 
 }
 </script>
-<style scoped>
-  .create-course-button {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
 
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .lab-header{
-    background-color: #f2f2f2;
-  }
-  
-  .full-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-
-  .input-text-box {
-    padding: 10px;
-    width: 740px;
-  }
-</style>
 
 
 

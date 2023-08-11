@@ -20,8 +20,8 @@ def login():
         post_data = request.get_json()
         user = User.authenticate(**post_data)
         if user is None:
-            data['alerts'] = f'{post_data.get("email")} was not found in the database. Try again!'
-            return jsonify(data), 401
+            data['status'] = 'failure'
+            return jsonify(data)
         else:
             token = jwt.encode({
                 'sub': user.email,
@@ -29,8 +29,9 @@ def login():
                 'exp': datetime.utcnow() + timedelta(minutes=120)},
                 app.config['SECRET_KEY']
             )
-            data['alerts'] = f'{post_data.get("email")}, You are now logged in!'
+            data['status'] = 'success'
             data['token'] = token
+            data['role'] = user.role
             return jsonify(data)
 
 @app.route('/userlist/<int:user_id>',methods=['PUT','DELETE'])
@@ -70,6 +71,12 @@ def user_list(current_user):
     json_users = [user.serialize() for user in users]
     return jsonify(json_users) 
 
+@app.route('/lablist')
+@login_req('instructor')
+def lab_list(current_user):
+    labs = Labs.query.all()
+    json_labs = [lab.serialize() for lab in labs]
+    return jsonify(json_labs)
 
 @app.route('/createuser', methods=["POST"])
 @login_req('admin')
@@ -330,11 +337,17 @@ def lab_fetcher(course_name,semester,section_num,session):
         students = User.query.join(user_group).filter(user_group.c.group_id == group.id).all()
         for student in students:
             student_names.append(student.name)
-        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress})
+        qs = Student_lab.query.filter_by (group_name=group.group_name, session_id=session_id).all()
+        latest_time = datetime.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+        for q in qs:
+            if q.submit_time > latest_time: latest_time = q.submit_time
+        latest_time = latest_time.strftime("%H:%M:%S")
+        dict.append({'name': group.group_name, 'members': student_names, 'group_id': group.id, 'handRaised': group.hand_raised, 'atCheckpoint': group.at_checkpoint, 'progress': group.progress, 'maxProgress': group.max_progress, 'latestTime': latest_time})
     return dict
 
-@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_num>",methods=['GET', 'POST'])
-def student_view(course_name,session_name,group_num,semester,section_num):
+@app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/<group_name>",methods=['GET', 'POST'])
+@login_req()
+def student_view(current_user, course_name,session_name,group_name,semester,section_num):
     '''
     This is used to get all the information for a student about a lab.
     It retrieves all information about the lab questions and their saved respones, and returns it all.
@@ -346,10 +359,16 @@ def student_view(course_name,session_name,group_num,semester,section_num):
         -session_name: session name (str)
         -group_num: group number (str)
     '''
-    course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404().id
-    session=Session.query.filter_by(course_id=course,name= session_name).first_or_404()
+    course=Course.query.filter_by(course_name=course_name,semester=semester,section_num=section_num).first_or_404()
+    course_id=course.id
+    session=Session.query.filter_by(course_id=course_id,name= session_name).first_or_404()
     lab_id=session.lab_id
     session_id=session.id
+    group = Group.query.filter_by(group_name=group_name,session_id=session_id).first()
+    students = User.query.join(user_group).filter(user_group.c.group_id==group.id).all()
+    if current_user.role != 'admin' and current_user.role != 'instructor':
+        if current_user not in students:
+            return {'status': 'failure'}, 401
     lab=Labs.query.filter_by (lab_id=lab_id).first_or_404()
     f=lab.questions
     raw_results = json.loads(f) 
@@ -363,22 +382,23 @@ def student_view(course_name,session_name,group_num,semester,section_num):
         now = datetime.now()
         student_lab=Student_lab(
             question_num= int(post_data.get("id")), 
-            group_name=group_num, 
+            group_name=group_name, 
             submit_time=now,
             saved_answer=post_data.get("answer")[str(post_data.get("id"))],
             session_id=session_id)
         db.session.add(student_lab) 
         db.session.commit()
-        group = Group.query.filter_by(group_name=group_num,session_id=session_id).first()
+        group = Group.query.filter_by(group_name=group_name,session_id=session_id).first()
         if int(post_data.get("id")) > int(group.progress):
             group.progress = int(post_data.get("id"))
             db.session.add(group)
             db.session.commit()
             session_id = group.session_id
-            socketio.emit('progress_update', (group_num, int(post_data.get("id"))), to=str(session_id))
-    progress=Group.query.filter_by(group_name=group_num,session_id=session_id).first().progress
+            room_name = course.course_name + ' ' + session.name
+            socketio.emit('progress_update', (group_name, int(post_data.get("id"))), to=room_name)
+    progress=Group.query.filter_by(group_name=group_name,session_id=session_id).first().progress
     response_object['progress']=progress
-    answers=Student_lab.query.filter_by (group_name=group_num, session_id=session_id).all()
+    answers=Student_lab.query.filter_by (group_name=group_name, session_id=session_id).all()
     for answer in answers:
         if response_object['answers'].get(answer.question_num)==None:
             response_object ['answers'][answer.question_num]={"answer":answer.saved_answer,"time": answer.submit_time}
@@ -390,7 +410,6 @@ def student_view(course_name,session_name,group_num,semester,section_num):
             response_object["answers"][i]= ""
         else:
             response_object["answers"][i]=response_object["answers"][i]["answer"]
-    print(response_object["answers"])
     return jsonify(response_object)
 
 @app.route("/<course_name>/<semester>/<int:section_num>/<session_name>/getgroups", methods=['GET'])
@@ -462,7 +481,7 @@ def newLab():
     into the database.
     '''
     data = request.get_json()
-    l = Labs.query.filter_by(title=data.get('title')).first()
+    l = Labs.query.filter_by(title=data.get('title')).first() 
     if l is not None or data.get('title') is None or data.get('questions') is None:
         return {'status': 'name exists'}
     lab = Labs(title=data.get('title'), questions=json.dumps(data.get('questions')), num_questions=int(data.get('num_questions')))
@@ -474,6 +493,46 @@ def newLab():
         return {'status': 'failure'}
     return {'status': 'success'}
 
+@app.route('/newlab/delete/<lab_name>', methods=['DELETE'])
+@login_req('instructor')
+def deleteLab(current_user, lab_name):
+    data={'status': 'success'}
+    if request.method == 'DELETE':
+        lab = Labs.query.filter_by(title=lab_name).first()
+        db.session.delete(lab)
+        db.session.commit()
+    return jsonify(data)
+    
+
+@app.route('/editlab/<lab_name>/get')
+@login_req('instructor')
+def editLabGetter(current_user, lab_name):
+    '''
+    This is used when editing a lab. It returns the information about the lab to the getter.
+    This is accessed when an instructor is trying to edit a lab that has already been created from the Lab List page.
+    '''
+    lab = Labs.query.filter_by(title=lab_name).first()
+    if lab is None:
+        return {'status': 'failure'}
+    return jsonify({'status': 'success', 'title': lab.title, 'questions': lab.questions})
+
+@app.route('/editlab/<lab_name>/post', methods=['POST'])
+@login_req('instructor')
+def editLabSubmit(current_user, lab_name):
+    '''
+    This is used when submitting a lab that has been edited.
+    This is accessed when an instructor edits a lab from the page.
+    '''
+    data = request.get_json()
+    lab = Labs.query.filter_by(title=lab_name).first()
+    if lab is None:
+        return {'status': 'failure'}
+    lab.questions = json.dumps(data.get('questions'))
+    lab.num_questions = int(data.get('num_questions'))
+    db.session.add(lab)
+    db.session.commit()
+    return {'status': 'success'}
+
 @socketio.on('enter_room')
 def enter_room(room_name):
     '''
@@ -482,14 +541,14 @@ def enter_room(room_name):
     join_room(str(room_name))
 
 @socketio.on('command_send')
-def send_command(course_name, group_name, command):
+def send_command(course_name, session_name, group_name, command):
     '''
     This is used to emit a signal that a group has raised their hand or reached a checkpoint.
     The signal is typically sent from the student live lab view and recieved in the instructor live lab view.
     '''
     course = Course.query.filter_by(course_name=course_name).first()
-    group = Group.query.filter_by(group_name=group_name, course_id=course.id).first()
-    session_name = Session.query.get(group.session_id).name
+    session = Session.query.filter_by(course_id=course.id, name=session_name).first()
+    group = Group.query.filter_by(group_name=group_name, course_id=course.id, session_id=session.id).first()
     if command == "handup":
         group.hand_raised = True
     elif command == "handdown":
@@ -502,3 +561,25 @@ def send_command(course_name, group_name, command):
     db.session.commit()
     room_name = course.course_name + ' ' + session_name
     emit('command', (group_name, command), to=str(room_name))
+
+@socketio.on('instructor_command')
+def instructor_command(course_name, session_name, group_name, command):
+    '''
+    This is used to emit a signal from an instructor to lower a group's hand or remove them from a checkpoint.
+    This is sent from the instructor live view and recieved in the student live view. 
+    '''
+    print(course_name)
+    print(session_name)
+    print(group_name)
+    course = Course.query.filter_by(course_name=course_name).first()
+    session = Session.query.filter_by(course_id=course.id, name=session_name).first()
+    group = Group.query.filter_by(group_name=group_name, course_id=course.id, session_id=session.id).first()
+    if command == 'handoff':
+        group.hand_raised = False
+    elif command == 'checkoff':
+        group.at_checkpoint = False
+    db.session.add(group)
+    db.session.commit()
+    room_name = course.course_name + ' ' + session_name
+    command_name = 'instructor_command_' + group_name
+    emit(command_name, (command), to=str(room_name))

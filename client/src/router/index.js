@@ -11,6 +11,7 @@ import Course from '../components/Course.vue'
 import CreateUser from '../components/CreateUser.vue'
 import Groups from '../components/Groups.vue'
 import NotFound from '../components/NotFound.vue'
+import LabList from '../components/LabList.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,9 +37,14 @@ const router = createRouter({
       component: CourseList
     },
     {
-      path: '/lab/create',
+      path: '/lab/create/:labName?',
       name: 'Lab Create',
       component: CreateLab
+    },
+    {
+      path: '/lablist',
+      name: 'Lab List',
+      component: LabList
     },
     {
       path: '/userlist',

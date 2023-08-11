@@ -1,4 +1,5 @@
 <template>
+    <div class="full-page">
     <div class="container">
         <h1>My Courses</h1>
         <table class="table table-striped table-bordered">
@@ -29,6 +30,7 @@
             </tbody>
         </table>
     </div>
+</div>
 </template>
 
 <script>
@@ -44,7 +46,6 @@ export default {
         getMyCourses() {
             const path = 'http://localhost:5001/mycourses'
             let accessToken = localStorage.getItem('token')
-            console.log('okay, yeah')
             axios.get(path, {headers: {'Authorization': accessToken}})
             .then((res) => {
                 this.courses = res.data
@@ -60,3 +61,14 @@ export default {
     }
 }
 </script>
+
+<style>
+.full-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+  }
+</style>

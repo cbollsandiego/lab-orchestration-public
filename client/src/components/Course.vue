@@ -1,11 +1,9 @@
 <template>
-    <div class="full-page">
-        <div v-if="currentUserRole === 'admin' || currentUserRole === 'instructor'">
-            <instructor-course></instructor-course>
-        </div>
-        <div v-if="currentUserRole === 'student' || currentUserRole === 'assistant'">
-            <student-course></student-course>
-        </div>
+    <div v-if="currentUserRole === 'admin' || currentUserRole === 'instructor'">
+        <instructor-course></instructor-course>
+    </div>
+    <div v-if="currentUserRole === 'student' || currentUserRole === 'assistant'">
+        <student-course></student-course>
     </div>
 </template>
 
@@ -38,13 +36,3 @@ export default {
 }
 </script>
 
-<style>
-.full-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f2f2f2;
-    padding: 20px;
-  }
-</style>
